@@ -296,8 +296,5 @@ If you encounter issues:
 1. Re-read the relevant section in `concepts.md`
 2. Test your code with simpler inputs
 3. Ask a classmate (collaboration on concepts is encouraged)
-4. Consult the instructor during lab hours
 
 **Remember:** The goal is not just to complete the assignment, but to understand how to build reusable, maintainable software systems.
-
-Good luck, Officer.
