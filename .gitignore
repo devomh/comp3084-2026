@@ -1,0 +1,9 @@
+# Temporary files
+_tmp/
+00_syllabus/
+
+plan.md
+
+# Python
+__pycache__/
+*.pyc

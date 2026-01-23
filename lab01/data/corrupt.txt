@@ -1,0 +1,9 @@
+Cette fichier contient des caractères spéciaux européens.
+Les voyelles accentuées: é è ê ë à â ù û ô ö ï î ç
+Les symboles: ± × ÷ ° ² ³
+Les caractères spéciaux: © ® § ¶ ½ ¼ ¾
+Lettres nordiques: å ø æ Å Ø Æ
+Lettres allemandes: ä ö ü ß Ä Ö Ü
+Ceci est un texte de test pour démontrer les problèmes d'encodage.
+Si vous voyez des caractères étranges quand vous ouvrez avec UTF-8, c'est normal!
+Le fichier a été encodé avec ISO-8859-1 (Latin-1).
