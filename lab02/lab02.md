@@ -28,6 +28,9 @@ Use the `file` command to identify file types.
 file data/*
 ```
 
+**Important**:
+Use line magic `%cd new/path/` to change working directory in a persistent form.
+
 **Record your observations:**
 | File | `file` output |
 |------|---------------|
@@ -231,7 +234,7 @@ def load_file(self):
     try:
         # TODO: Open file in binary mode ('rb')
         # TODO: Read all bytes into self.data
-        # Hint: with open(self.filepath, 'rb') as f:
+        # TODO: Print a success message showing bytes loaded
         pass
 
     except FileNotFoundError:
@@ -241,23 +244,21 @@ def load_file(self):
 
     except PermissionError:
         # TODO: Handle permission denied
+        # TODO: Set self.data to empty bytes
         pass
 ```
 
 **Implementation hint:**
-```python
-def load_file(self):
-    try:
-        with open(self.filepath, 'rb') as f:
-            self.data = f.read()
-        print(f"Loaded {len(self.data)} bytes from {self.filepath}")
-    except FileNotFoundError:
-        print(f"Error: File not found: {self.filepath}")
-        self.data = b''
-    except PermissionError:
-        print(f"Error: Permission denied: {self.filepath}")
-        self.data = b''
+Open the file using binary read mode ('rb'). Use a `with` statement to ensure the file is properly closed. Read all bytes using the `.read()` method and store in `self.data`. Print a message showing how many bytes were loaded. For exceptions, print an informative error message and set `self.data` to an empty bytes object (`b''`).
+
+<details>
+<summary>Expected output</summary>
+
 ```
+Loaded 1523 bytes from data/unknown_a.bin
+```
+
+</details>
 
 **Test your method:**
 ```python
@@ -267,6 +268,17 @@ if __name__ == "__main__":
     print(f"Loaded {len(analyzer.data)} bytes")
     print(f"First 16 bytes: {analyzer.data[:16]}")
 ```
+
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 1523 bytes from data/unknown_a.bin
+Loaded 1523 bytes
+First 16 bytes: b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR'
+```
+
+</details>
 
 ---
 
@@ -287,9 +299,11 @@ def get_header(self, num_bytes=16):
     """
     # TODO: Get the first num_bytes from self.data
     # TODO: Return as hex string with spaces between bytes
-    # Hint: Use .hex(' ') for spaced hex output
     pass
 ```
+
+**Implementation hint:**
+Slice the first `num_bytes` from `self.data`. Convert the bytes to a hexadecimal string with spaces between each byte. The bytes object has a `.hex()` method that accepts a separator parameter.
 
 **Test your method:**
 ```python
@@ -299,10 +313,16 @@ if __name__ == "__main__":
     print(f"Header: {analyzer.get_header(16)}")
 ```
 
-**Expected output format:**
+<details>
+<summary>Expected output</summary>
+
 ```
 Header: 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52
 ```
+
+This represents the PNG signature (89 50 4E 47...) followed by the image metadata.
+
+</details>
 
 ---
 
@@ -322,24 +342,14 @@ def detect_type(self):
     # TODO: Loop through self.magic_db
     # TODO: Check if self.data starts with each signature
     # TODO: Set self.file_type and return if match found
-    # Hint: Use self.data.startswith(signature)
 
     # If no match found
     self.file_type = 'Unknown'
     return self.file_type
 ```
 
-**Implementation approach:**
-```python
-def detect_type(self):
-    for signature, file_type in self.magic_db.items():
-        if self.data.startswith(signature):
-            self.file_type = file_type
-            return self.file_type
-
-    self.file_type = 'Unknown'
-    return self.file_type
-```
+**Implementation hint:**
+Iterate through the `self.magic_db` dictionary to access each signature and its corresponding file type name. For each signature, check if `self.data` starts with that byte sequence (bytes objects have a `.startswith()` method). When you find a match, set `self.file_type` to the corresponding type and return it immediately. If the loop completes without finding a match, set `self.file_type` to 'Unknown' and return it.
 
 **Test your method:**
 ```python
@@ -350,6 +360,22 @@ if __name__ == "__main__":
         file_type = analyzer.detect_type()
         print(f"{filename}: {file_type}")
 ```
+
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 1523 bytes from data/unknown_a.bin
+unknown_a.bin: PNG
+Loaded 2847 bytes from data/unknown_b.bin
+unknown_b.bin: JPEG
+Loaded 418 bytes from data/unknown_c.bin
+unknown_c.bin: Unknown
+```
+
+Note: `unknown_c.bin` returns "Unknown" because it's actually a text file with no binary magic signature.
+
+</details>
 
 ---
 
@@ -399,6 +425,21 @@ if __name__ == "__main__":
     for s in strings:
         print(f"  - {s}")
 ```
+
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 2048 bytes from data/hidden_message.bin
+Extracted strings:
+  - The secret code is: ALPHA-BRAVO-3084
+  - Meeting location: Building 7, Room 404
+  - Access granted to user: detective_2026
+```
+
+(Actual strings will vary based on the hidden_message.bin file contents)
+
+</details>
 
 ---
 
@@ -454,6 +495,19 @@ if __name__ == "__main__":
     print(analyzer.hexdump(0, 64))
 ```
 
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 1523 bytes from data/unknown_a.bin
+00000000  89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52  |.PNG........IHDR|
+00000010  00 00 00 64 00 00 00 64 08 02 00 00 00 ff 80 02  |...d...d........|
+00000020  03 00 00 00 09 70 48 59 73 00 00 0b 13 00 00 0b  |.....pHYs.......|
+00000030  13 01 00 9a 9c 18 00 00 00 07 74 49 4d 45 07 e6  |..........tIME..|
+```
+
+</details>
+
 ---
 
 ### Exercise 2.7: Report Method
@@ -502,6 +556,34 @@ if __name__ == "__main__":
     analyzer.detect_type()
     analyzer.report()
 ```
+
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 1523 bytes from data/unknown_a.bin
+============================================================
+Binary Analysis Report: data/unknown_a.bin
+============================================================
+
+File Size: 1523 bytes
+Detected Type: PNG
+
+Header (first 16 bytes):
+  Hex: 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52
+  ASCII: .PNG........IHDR
+
+Extracted Strings (first 5):
+  - IHDR
+  - pHYs
+  - tIME
+  - IDAT
+  - IEND
+
+============================================================
+```
+
+</details>
 
 ---
 
@@ -659,10 +741,12 @@ class FileRepairer:
         Returns:
             bool: True if repair successful
         """
+        # TODO: Check if file_type exists in SIGNATURES
         # TODO: Get the expected signature
-        # TODO: Replace corrupted bytes with correct values
-        # TODO: Write to output_path
-        # TODO: Return True if successful
+        # TODO: If output_path is None, generate one from self.filepath
+        # TODO: Replace corrupted bytes with correct signature values
+        # TODO: Write to output_path in binary mode
+        # TODO: Return True if successful, False otherwise
         pass
 
     def verify(self, filepath):
@@ -684,28 +768,10 @@ class FileRepairer:
 **Your task:** Implement the `repair()` and `verify()` methods.
 
 **Implementation hints for `repair()`:**
-```python
-def repair(self, file_type='PNG', output_path=None):
-    if file_type not in self.SIGNATURES:
-        print(f"Unknown file type: {file_type}")
-        return False
+Check if the requested file_type exists in the SIGNATURES dictionary. Get the correct signature bytes for that file type. If no output_path is provided, create one by modifying self.filepath (e.g., replace '.' with '_repaired.'). Loop through the signature bytes and replace the corresponding bytes in self.data (remember, self.data is a bytearray, so it's mutable). Write the repaired bytearray to the output file in binary write mode ('wb'). Return True on success, False if the file type is unknown.
 
-    if output_path is None:
-        output_path = self.filepath.replace('.', '_repaired.')
-
-    signature = self.SIGNATURES[file_type]
-
-    # Patch the header
-    for i, byte in enumerate(signature):
-        self.data[i] = byte
-
-    # Write repaired file
-    with open(output_path, 'wb') as f:
-        f.write(self.data)
-
-    print(f"Repaired file written to: {output_path}")
-    return True
-```
+**Implementation hints for `verify()`:**
+Read the file at the given filepath in binary mode. Compare the first N bytes against each signature in the SIGNATURES dictionary using the same logic as the detect_type method. Return the matching file type or 'Unknown'. This method is similar to BinaryAnalyzer's detect_type but operates on any file path, not just self.filepath.
 
 ---
 
@@ -729,6 +795,27 @@ if __name__ == "__main__":
         result = repairer.verify('data/repaired.png')
         print(f"\nVerification: {result}")
 ```
+
+<details>
+<summary>Expected output</summary>
+
+```
+Loaded 1523 bytes from data/corrupted.png
+
+Diagnosis for PNG:
+Expected: 89 50 4e 47 0d 0a 1a 0a
+Actual:   89 00 00 00 0d 0a 1a 0a
+
+  Byte 1: 00 should be 50
+  Byte 2: 00 should be 4e
+  Byte 3: 00 should be 47
+
+Repaired file written to: data/repaired.png
+
+Verification: PNG
+```
+
+</details>
 
 **Verify with command line:**
 ```bash
@@ -1023,5 +1110,3 @@ You've completed the Hex Detective investigation. You've learned how to:
 - Use CLI tools for forensic analysis
 - Build Python tools for binary manipulation
 - Repair corrupted file headers
-
-**Next Steps:** Review your code, ensure it's well-documented, and submit through the course portal.
