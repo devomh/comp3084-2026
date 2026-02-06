@@ -1,4 +1,5 @@
 # Lab 02 Notebook: The Hex Detective
+
 **Binary Forensics Investigation**
 
 ---
@@ -14,6 +15,7 @@ This notebook guides you through binary file analysis step-by-step. You will lea
 - [ ] Verify you have access to `xxd` or `hexdump` command
 
 ---
+
 
 ## Phase 1: Field Work - CLI Binary Forensics
 
@@ -42,6 +44,7 @@ file data/*
 
 ---
 
+
 ### Exercise 1.2: File Size Analysis
 
 **Task B: Check file sizes**
@@ -61,6 +64,7 @@ ls -lh data/
 **Question:** Do any file sizes give hints about their content type?
 
 ---
+
 
 ### Exercise 1.3: Hex Dump Examination
 
@@ -101,6 +105,7 @@ xxd -l 64 data/corrupted.png
 
 ---
 
+
 ### Exercise 1.4: String Extraction
 
 Use `strings` to find readable text in binary files.
@@ -123,6 +128,7 @@ strings data/unknown_a.bin | head -n 10
 3. Did you find any readable strings in the image files?
 
 ---
+
 
 ### Exercise 1.5: Comparing Corrupted vs Original
 
@@ -150,7 +156,9 @@ Corrupted: ?? ?? ?? ?? ?? ?? ?? ?? ...
 
 ---
 
+
 ---
+
 
 ## Phase 2: The Build - BinaryAnalyzer Class
 
@@ -298,6 +306,7 @@ Header: 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52
 
 ---
 
+
 ### Exercise 2.4: File Type Detection Method
 
 Add the `detect_type()` method to identify files by magic bytes.
@@ -343,6 +352,7 @@ if __name__ == "__main__":
 ```
 
 ---
+
 
 ### Exercise 2.5: String Extraction Method
 
@@ -528,7 +538,9 @@ if __name__ == "__main__":
 
 ---
 
+
 ---
+
 
 ## Phase 3: Critical Incident - File Repair
 
@@ -561,6 +573,7 @@ for i in range(8):
 **Record your findings:** Which bytes are corrupted?
 
 ---
+
 
 ### Exercise 3.2: Build the FileRepairer Class
 
@@ -776,6 +789,7 @@ After patching, the image is fully functional.
 
 ---
 
+
 ---
 
 ## Phase 4: Integration and Submission
@@ -857,6 +871,7 @@ python3 main.py
 ```
 
 ---
+
 
 ### Exercise 4.2: Document Your Work
 
@@ -952,6 +967,7 @@ If yes, complete the following:
 
 ---
 
+
 ## Verification Checklist
 
 Before submitting, ensure:
@@ -1009,7 +1025,3 @@ You've completed the Hex Detective investigation. You've learned how to:
 - Repair corrupted file headers
 
 **Next Steps:** Review your code, ensure it's well-documented, and submit through the course portal.
-
----
-
-**End of Notebook**
