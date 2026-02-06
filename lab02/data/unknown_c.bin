@@ -1,0 +1,12 @@
+System Log Extract - Server Alpha
+==================================
+[2026-01-15 08:23:14] INFO: Service started successfully
+[2026-01-15 08:23:15] INFO: Listening on port 8080
+[2026-01-15 09:45:22] WARN: High memory usage detected (78%)
+[2026-01-15 10:12:33] ERROR: Connection timeout to database
+[2026-01-15 10:12:34] INFO: Retry attempt 1 of 3
+[2026-01-15 10:12:35] INFO: Database connection restored
+[2026-01-15 14:30:00] INFO: Scheduled backup initiated
+[2026-01-15 14:35:12] INFO: Backup completed successfully
+[2026-01-15 18:00:00] INFO: Service shutdown requested
+[2026-01-15 18:00:01] INFO: Graceful shutdown complete
