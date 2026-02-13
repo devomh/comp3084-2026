@@ -1,0 +1,14 @@
+{
+  "character": {
+    "name": "Gimli",
+    "level": 42,
+    "health": 980,
+    "max_health": 1200,
+    "mana": 300,
+    "max_mana": 300,
+    "position": [10, 20],
+    "gold": 5000,
+    "experience": 35000,
+    "inventory": ["Axe", "Shield" "Helmet"]
+  }
+}

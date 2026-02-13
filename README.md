@@ -28,8 +28,18 @@ comp3084_2026-01/
 │   ├── lab01.md           # Guided notebook
 │   ├── lab01.ipynb        # Jupyter notebook
 │   └── data/              # Evidence files
-├── lab02/                 # (Future) Lab 02: The Hex Detective
-├── lab03/                 # (Future) Lab 03: The Time Capsule
+├── lab02/                 # Lab 02: The Hex Detective
+│   ├── README.md
+│   ├── concepts.md
+│   ├── lab02.md
+│   └── data/
+├── lab03/                 # Lab 03: The Time Capsule
+│   ├── README.md
+│   ├── concepts.md
+│   ├── lab03.md
+│   ├── character.py       # Starter code
+│   ├── main.py            # Starter code
+│   └── data/
 └── ...                    # Additional labs (weeks 4-12)
 ```
 
@@ -38,7 +48,7 @@ comp3084_2026-01/
 ### Phase 1: File System & Forensics (Weeks 1-3)
 - **Lab 01**: The Rosetta Frequency - Linguistic fingerprinting through letter frequency analysis
 - **Lab 02**: The Hex Detective - Binary file formats and data reconstruction
-- **Lab 03**: The Time Capsule - File metadata and temporal analysis
+- **Lab 03**: The Time Capsule - Data persistence and serialization formats
 
 ### Phase 2: Big Data & Processing (Weeks 4-7)
 - MapReduce patterns, computer vision, audio processing, and real-world datasets

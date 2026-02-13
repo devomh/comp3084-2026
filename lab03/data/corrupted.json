@@ -1,0 +1,12 @@
+{
+  "character": {
+    "name": "Legolas",
+    "level": 45,
+    "health": 750,
+    "max_health": 1200,
+    "mana": 420,
+    "max_mana": 600,
+    "position": [25, 30],
+    "gold": 5000,
+    "experience": 45000,
+    "inventory": ["Bow of the Galadhrim", "Elven Dagger"

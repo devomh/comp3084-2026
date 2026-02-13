@@ -1,0 +1,14 @@
+[CHARACTER]
+name=Gandalf
+level=99
+health=500
+max_health=500
+mana=9999
+max_mana=9999
+position=0,0
+gold=50000
+experience=999999
+[INVENTORY]
+Staff of Power
+Ring of Protection
+Pipe
