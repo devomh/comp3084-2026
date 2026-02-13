@@ -35,7 +35,7 @@ print(f"{hero.name} is level {hero.level}")
 
 ---
 
-### Exercise 1.2: Format Comparison Research (10 mins)
+### Exercise 1.2: Format Comparison Research
 
 Review the characteristics of the four serialization formats:
 
@@ -342,12 +342,19 @@ def load_binary(cls, filepath):
         header_data = f.read(HEADER_SIZE)
         fields = struct.unpack(HEADER_FORMAT, header_data)
 
-        # TODO: Extract fields from the unpacked tuple
-        # fields[0] is the name bytes (decode and strip null bytes)
-        # fields[1] through fields[10] are the integer values
-        # Use the inv_count (fields[10]) to read inventory items
-        # Each item: read 4-byte length, then read that many bytes
-        pass
+        name = fields[0].rstrip(b'\x00').decode('utf-8')
+        level, health, max_health, mana, max_mana, x, y, gold, experience, inv_count = fields[???]
+
+        character = cls(???, ???)
+        # TODO: Assign the remaining character attributes (health, max_health,
+        #       mana, max_mana, position, gold, experience)
+
+        for _ in range(???):
+            n = struct.unpack('i', f.read(???))[0]
+            item = f.read(???).decode('utf-8')
+            character.inventory.append(item)
+
+        return character
 ```
 
 **Test it:**
