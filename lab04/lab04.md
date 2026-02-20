@@ -149,7 +149,7 @@ Each channel is a 2D array. When displayed with `cmap='gray'`, bright areas indi
 
 ## Phase 2: The Build (Manual Image Filters)
 
-Now that we understand how images are structured as arrays, it is time to build our forensic image processing toolkit. Each filter you implement will be a function in `image_filters.py`. You will write the function, then test it here in the notebook.
+Now that we understand how images are structured as arrays, it is time to build our forensic image processing toolkit. Implement each filter function directly in the cell provided, then run the test cell immediately below to verify your result.
 
 ---
 
@@ -165,7 +165,7 @@ gray = 0.2989 * R + 0.5870 * G + 0.1140 * B
 
 This produces a perceptually accurate grayscale image -- much better than a simple average of the three channels.
 
-**Task:** Implement the `to_grayscale()` function in `image_filters.py`.
+**Task:** Implement the `to_grayscale()` function in the cell below.
 
 ```python
 def to_grayscale(img):
@@ -180,7 +180,7 @@ def to_grayscale(img):
     # Hint: Use array slicing for each channel, apply weights,
     #       sum them, and convert back to uint8.
     # Remember: multiplying a uint8 array by a float automatically
-    #           promotes to float64 -- but you must cast back at the end.
+    #           promotes to float64 -- but you must cast back at the end. Use method .astype(np.uint8)
     # TODO: Implement
     pass
 ```
@@ -188,8 +188,6 @@ def to_grayscale(img):
 **Test your implementation:**
 
 ```python
-from image_filters import to_grayscale
-
 gray = to_grayscale(img)
 print(f"Input shape:  {img.shape}")    # (300, 300, 3)
 print(f"Output shape: {gray.shape}")   # (300, 300)
@@ -248,7 +246,7 @@ inverted = 255 - original
 
 Black (0) becomes white (255). White (255) becomes black (0). Red (255, 0, 0) becomes cyan (0, 255, 255). Every color maps to its complement.
 
-**Task:** Implement the `invert()` function in `image_filters.py`.
+**Task:** Implement the `invert()` function in the cell below.
 
 ```python
 def invert(img):
@@ -269,8 +267,6 @@ def invert(img):
 **Test your implementation:**
 
 ```python
-from image_filters import invert
-
 inv = invert(img)
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -335,7 +331,7 @@ print(f"10 - 50 = {c - d}")     # Expected: -40. Actual: 216!
 The `uint8` type can only hold values 0-255. Arithmetic that exceeds this range silently wraps around, producing incorrect results. The fix: always convert to `float64` before doing arithmetic, then clip and cast back to `uint8`.
 </details>
 
-**Task:** Implement `adjust_brightness_contrast()` in `image_filters.py`.
+**Task:** Implement `adjust_brightness_contrast()` in the cell below.
 
 ```python
 def adjust_brightness_contrast(img, alpha=1.0, beta=0):
@@ -349,7 +345,7 @@ def adjust_brightness_contrast(img, alpha=1.0, beta=0):
     Returns:
         NumPy array with same shape, dtype uint8
     """
-    # Step 1: Convert to float64 to avoid uint8 overflow
+    # Step 1: Convert to float64 to avoid uint8 overflow. Use method .astype(np.float64)
     # Step 2: Apply the formula: alpha * pixel + beta
     # Step 3: Clip values to [0, 255]
     # Step 4: Convert back to uint8
@@ -360,8 +356,6 @@ def adjust_brightness_contrast(img, alpha=1.0, beta=0):
 **Test your implementation:**
 
 ```python
-from image_filters import adjust_brightness_contrast
-
 bright = adjust_brightness_contrast(img, alpha=1.4, beta=30)
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -391,7 +385,7 @@ print(f"Output range: {bright.min()} - {bright.max()}")
 binary[y, x] = 255 if gray[y, x] > threshold else 0
 ```
 
-**Task:** Implement `threshold()` in `image_filters.py`.
+**Task:** Implement `threshold()` in the cell below.
 
 ```python
 def threshold(gray_img, thresh=128):
@@ -414,8 +408,6 @@ def threshold(gray_img, thresh=128):
 **Test your implementation:**
 
 ```python
-from image_filters import threshold
-
 # First, convert to grayscale, then threshold
 gray = to_grayscale(img)
 binary = threshold(gray, thresh=128)
@@ -463,7 +455,7 @@ kernel = [[1/9, 1/9, 1/9],
 
 For a detailed explanation of how convolution works step-by-step, including why kernels must be odd-sized and how to handle edge pixels, see the **Convolution** section in [`concepts.md`](concepts.md).
 
-**Task:** Implement `box_blur()` in `image_filters.py`.
+**Task:** Implement `box_blur()` in the cell below.
 
 ```python
 def box_blur(img, kernel_size=3):
@@ -505,8 +497,6 @@ def box_blur(img, kernel_size=3):
 **Test your implementation:**
 
 ```python
-from image_filters import box_blur
-
 blurred_3 = box_blur(img, kernel_size=3)
 blurred_5 = box_blur(img, kernel_size=5)
 
@@ -537,8 +527,6 @@ print(f"5x5 blur - noticeably smoothed")
 Now that all five filters are implemented, let us apply them all to `surveillance_a.png` and display the results in a single figure. This serves as both a visual summary and a verification that all your implementations work correctly.
 
 ```python
-from image_filters import to_grayscale, invert, adjust_brightness_contrast, threshold, box_blur
-
 # Load the image
 img = np.array(Image.open('data/surveillance_a.png'))
 
@@ -636,7 +624,43 @@ plt.show()
 2. The first **32 pixels** encode the message length as a 32-bit unsigned integer (MSB first).
 3. The remaining pixels encode the message as **ASCII characters** (8 bits per character, MSB first).
 
-**Task:** Implement `extract_lsb_message()` in `steganography.py`.
+The three helper functions below are already implemented. Read them carefully --
+you will need to call them in the right order to build `extract_lsb_message()`.
+
+```python
+# Helper functions -- already implemented, do not modify
+
+def assemble(bits):
+    """Reconstruct an integer from a sequence of bits (MSB first).
+
+    Args:    bits -- sequence of 0s and 1s
+    Returns: int
+    """
+    value = 0
+    for bit in bits:
+        value = (value << 1) | int(bit)
+    return value
+
+def bits_to_symbol(bits):
+    """Convert 8 bits (MSB first) to a single ASCII character.
+
+    Args:    bits -- sequence of exactly 8 values (0 or 1)
+    Returns: str (one character)
+    """
+    return chr(assemble(bits))
+
+def scan(channel):
+    """Extract the least significant bit from every element of a 2D array.
+
+    Args:    channel -- 2D NumPy array (H, W), dtype uint8
+    Returns: 1D NumPy array of 0s and 1s
+    """
+    return channel.flatten() & 1
+```
+
+**Task:** Using the helpers above, complete `extract_lsb_message()` by filling
+in each blank. Each step tells you *what* to do -- you must identify *which
+helper* to call and *which arguments* to pass.
 
 ```python
 def extract_lsb_message(img):
@@ -648,39 +672,26 @@ def extract_lsb_message(img):
     Returns:
         str: The decoded hidden message
     """
-    # Step 1: Flatten the Red channel to a 1D array
-    red_channel = img[:, :, 0].flatten()
+    # Step 1: Get a flat 1D array of LSBs from the Red channel.
+    #         Which helper? Which channel index?
+    lsbs = ___(___)
 
-    # Step 2: Extract LSBs using bitwise AND
-    lsbs = red_channel & 1
+    # Step 2: The first 32 LSBs encode the message length as an integer.
+    #         Which helper? Which slice of lsbs?
+    msg_length = ___(___)
 
-    # Step 3: Read the first 32 bits as message length
-    # Hint: Iterate through bits, shift and accumulate:
-    #   msg_length = 0
-    #   for bit in lsbs[:32]:
-    #       msg_length = (msg_length << 1) | int(bit)
-    # TODO: Implement length extraction
+    # Step 3: Each character occupies 8 consecutive LSBs after the 32-bit header.
+    #         Which helper? How do you slice lsbs for the i-th character?
+    message = ''
+    for i in range(msg_length):
+        message += ___(lsbs[___ : ___])
 
-    # Step 4: Read the message bits (after the 32-bit header)
-    # Hint: Group bits into 8-bit chunks, convert each to ASCII:
-    #   message = ''
-    #   for i in range(msg_length):
-    #       byte_bits = lsbs[32 + i*8 : 32 + (i+1)*8]
-    #       char_value = 0
-    #       for bit in byte_bits:
-    #           char_value = (char_value << 1) | int(bit)
-    #       message += chr(char_value)
-    # TODO: Implement message extraction
-
-    # Step 5: Return the decoded message
-    pass
+    return message
 ```
 
 **Test your implementation:**
 
 ```python
-from steganography import extract_lsb_message
-
 stego_img = np.array(Image.open('data/stego_image.png'))
 message = extract_lsb_message(stego_img)
 
@@ -712,7 +723,7 @@ print(f"Maximum message length: {max_chars} characters ({max_chars} bytes)")
 
 **Objective:** Write the reverse function -- hide your own message inside an image.
 
-If you can decode, you should be able to encode. Implement the `encode_lsb_message()` function in `steganography.py` that takes an image and a message string, and returns a new image with the message hidden in the Red channel LSBs.
+If you can decode, you should be able to encode. Implement the `encode_lsb_message()` function in the cell below that takes an image and a message string, and returns a new image with the message hidden in the Red channel LSBs.
 
 ```python
 def encode_lsb_message(img, message):
@@ -738,8 +749,6 @@ def encode_lsb_message(img, message):
 **Test the round-trip:** Encode a message, then decode it. The result should match.
 
 ```python
-from steganography import encode_lsb_message, extract_lsb_message
-
 # Use a clean image as the carrier
 carrier = np.array(Image.open('data/surveillance_a.png'))
 secret = "Testing 123 -- this message is hidden in plain sight!"
@@ -787,7 +796,7 @@ Congratulations, Analyst. You have successfully completed the Matrix Vision inve
 **Before you leave:**
 
 - Complete all sections of [`submission.md`](submission.md), including the decoded message, capacity analysis, and reflection questions.
-- Ensure your `image_filters.py`, `steganography.py`, and `main.py` files run without errors.
+- Ensure all notebook cells run without errors from top to bottom.
 - Include your AI Usage Appendix if applicable.
 
 **Looking ahead:** The array manipulation and vectorized operations you practiced today form the foundation for processing large-scale data. In upcoming labs, you will apply similar patterns to audio signals, streaming data, and more.

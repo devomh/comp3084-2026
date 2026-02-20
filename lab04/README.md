@@ -90,7 +90,7 @@ pixel stores `[Red, Green, Blue]` values in the range 0–255.
 
 ### Phase 2: The Build — Manual Image Filters (80 min)
 
-**Objective:** Implement five forensic image filters in [`image_filters.py`](image_filters.py)
+**Objective:** Implement five forensic image filters directly in the notebook
 using only NumPy operations.
 
 #### Part A: Grayscale Conversion (15 min)
@@ -166,7 +166,7 @@ pixel — a change of ±1 that is invisible to the human eye.
 2. The first **32 pixels** encode the message length as a 32-bit integer (MSB first)
 3. The remaining pixels encode the message as **ASCII characters** (8 bits each, MSB first)
 
-Implement `extract_lsb_message()` in [`steganography.py`](steganography.py):
+Implement `extract_lsb_message()` in the notebook:
 
 ```python
 red_channel = img[:, :, 0].flatten()
@@ -185,33 +185,26 @@ confirm it matches exactly.
 
 ## Wrap-Up
 
-After completing all phases, run [`main.py`](main.py) to produce a combined
-filter showcase and steganography decode report:
-
-```bash
-python main.py
-```
-
-This script applies all five filters to `surveillance_a.png`, displays them in
-a 2×3 grid, and prints the decoded message from `stego_image.png`. If all panels
+After completing all phases, run the **Filter Showcase** cell in the notebook
+to produce a 2×3 grid of all five filters applied to `surveillance_a.png`, then
+run the steganography decode cell to print the hidden message. If all panels
 render correctly and the message is readable, your investigation is complete.
 
 **Before you leave:**
 
 - Complete all sections of [`submission.md`](submission.md), including the
   decoded message, capacity analysis, and reflection questions.
-- Ensure `image_filters.py`, `steganography.py`, and `main.py` all run without errors.
+- Ensure all notebook cells run without errors from top to bottom.
 - Include your AI Usage Appendix if applicable.
 
 ---
 
 ## Submission Requirements
 
-### 1. Code Files
+### 1. Notebook
 
-- [`image_filters.py`](image_filters.py) — All 5 filter functions implemented
-- [`steganography.py`](steganography.py) — LSB message extraction working
-- [`main.py`](main.py) — Demo script runs without errors
+- [`lab04.ipynb`](lab04.ipynb) — All cells implemented and run without errors,
+  top to bottom
 
 ### 2. Output Files
 
