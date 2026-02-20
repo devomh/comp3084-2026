@@ -24,19 +24,19 @@ This document outlines the 12-week schedule of investigations for COMP3084. Each
 *   **AI Role**: (Optional) Compare the file sizes and readability of the different formats.
 *   **Critical Incident**: "Data Recovery". Recover a corrupted user profile from a partial JSON dump and verify its integrity using a checksum algorithm.
 
-### Phase 2: Big Data & Processing (Weeks 4-7)
+### Phase 2: Processing & Big Data (Weeks 4-7)
 
-**Week 4: The Needle in the Haystack (Syllabus: IV - MapReduce)**
-*   **Theme**: Distributed Thinking.
-*   **Task**: Simulate a MapReduce job on a single machine using Python generators. Process a massive log file (1GB+) to count error codes.
-*   **AI Role**: (Optional) Generate the massive dummy log file. Optimize the mapping function.
-*   **Critical Incident**: The "Risk Analysis". Correlate IP addresses with error codes to find a "hacker" in the logs.
-
-**Week 5: Matrix Vision (Syllabus: V - Vectors & Homogeneous Data)**
+**Week 4: Matrix Vision (Syllabus: V - Vectors & Homogeneous Data)**
 *   **Theme**: Computer Vision Basics.
 *   **Task**: Load an image as a NumPy array. Apply manual filters (grayscale, inversion, thresholding) without using image libraries (only array math).
 *   **AI Role**: (Optional) Explain the matrix math behind a "blur" convolution.
 *   **Critical Incident**: "Steganography". Use boolean masking to reveal a hidden message encoded in the least significant bits of the pixel values.
+
+**Week 5: The Needle in the Haystack (Syllabus: IV - MapReduce)**
+*   **Theme**: Distributed Thinking.
+*   **Task**: Simulate a MapReduce job on a single machine using Python generators. Process a massive log file (1GB+) to count error codes.
+*   **AI Role**: (Optional) Generate the massive dummy log file. Optimize the mapping function.
+*   **Critical Incident**: The "Risk Analysis". Correlate IP addresses with error codes to find a "hacker" in the logs.
 
 **Week 6: Digital Waves (Syllabus: VI - Digital Signals)**
 *   **Theme**: Audio Engineering.
