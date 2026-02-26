@@ -32,23 +32,25 @@ This document outlines the 12-week schedule of investigations for COMP3084. Each
 *   **AI Role**: (Optional) Explain the matrix math behind a "blur" convolution.
 *   **Critical Incident**: "Steganography". Use boolean masking to reveal a hidden message encoded in the least significant bits of the pixel values.
 
-**Week 5: The Needle in the Haystack (Syllabus: IV - MapReduce)**
-*   **Theme**: Distributed Thinking.
-*   **Task**: Simulate a MapReduce job on a single machine using Python generators. Process a massive log file (1GB+) to count error codes.
-*   **AI Role**: (Optional) Generate the massive dummy log file. Optimize the mapping function.
-*   **Critical Incident**: The "Risk Analysis". Correlate IP addresses with error codes to find a "hacker" in the logs.
-
-**Week 6: Digital Waves (Syllabus: VI - Digital Signals)**
+**Week 5: Digital Waves (Syllabus: VI - Digital Signals)**
 *   **Theme**: Audio Engineering.
 *   **Task**: Read raw audio (WAV) files. Visualize the waveform. Change the volume, speed up, or reverse the audio by manipulating the raw bytes.
 *   **AI Role**: (Optional) Help write the code to convert stereo to mono by averaging channels.
 *   **Critical Incident**: "The Ghost Voice". Isolate a specific frequency or remove high-pitch noise from a "dirty" recording.
 
-**Week 7: The Data Lake (Syllabus: VII - Heterogeneous Tables)**
+**Week 6: The Data Lake (Syllabus: VII - Heterogeneous Tables)**
 *   **Theme**: Urban Data Science.
 *   **Task**: Use Pandas to load real data from `data.pr.gov` (e.g., energy consumption or crime stats). Filter, sort, and re-index.
 *   **AI Role**: (Optional) "Data Assistant" - ask AI to generate the Pandas one-liners for complex groupings.
 *   **Critical Incident**: Find the anomaly. Which municipality had the weirdest power consumption pattern?
+
+**Week 7: The Needle in the Haystack (Syllabus: IV - MapReduce)**
+*   **Theme**: Distributed Thinking.
+*   **Task**: Simulate a MapReduce job on a single machine using Python generators. Process a massive log file (1GB+) to count error codes.
+*   **AI Role**: (Optional) Generate the massive dummy log file. Optimize the mapping function.
+*   **Critical Incident**: The "Risk Analysis". Correlate IP addresses with error codes to find a "hacker" in the logs.
+
+
 
 ### Phase 3: Advanced Analysis (Weeks 8-11)
 
