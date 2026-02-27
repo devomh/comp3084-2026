@@ -21,18 +21,113 @@ Your mission is threefold:
 
 ## Setup
 
-Run this cell first to import all required libraries.
+Run this cell first. Every code cell in this notebook depends on these imports and
+helper functions (defined in [`concepts.md`](concepts.md)).
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from IPython.display import Audio, display
+
+RATE = 16000  # Sample rate used throughout this lab
+```
+
+### Helper Functions — Our Audio Toolkit
+
+These three helpers keep later code compact and enforce the **See-Then-Hear**
+pattern from `concepts.md`. Run this cell before any exercise.
+
+```python
+def generate_note(freq, duration=2.0, rate=RATE, amplitude=10000):
+    """Generate a pure sine wave at the given frequency.
+
+    Args:
+        freq: float, frequency in Hz (e.g., 440.0 for A4)
+        duration: float, length in seconds (default 2.0)
+        rate: int, sample rate in Hz (default 16000)
+        amplitude: int, peak amplitude (default 10000)
+
+    Returns:
+        NumPy array of shape (int(rate * duration),), dtype int16
+    """
+    t = np.linspace(0, duration, int(rate * duration), endpoint=False)
+    samples = (np.sin(2 * np.pi * freq * t) * amplitude).astype(np.int16)
+    return samples
+
+
+def compare_sounds(s1, s2, label1='Signal 1', label2='Signal 2',
+                   rate=RATE, layout='side', zoom=1.0,
+                   color1='steelblue', color2='crimson',
+                   normalize=False):
+    """Plot and play two sound arrays for comparison.
+
+    Args:
+        s1, s2: NumPy arrays (int16 or float) — the two signals to compare.
+        label1, label2: str — display names for each signal.
+        rate: int — sample rate in Hz.
+        layout: 'side' for stacked subplots, 'overlap' for same axes.
+        zoom: float in (0, 1] — fraction of the signal to display.
+              1.0 = full signal, 0.1 = first 10% (zoomed in).
+        color1, color2: matplotlib color names for each signal.
+        normalize: Whether Audio playback is normalized or not. Default False
+    """
+    n1 = max(1, int(len(s1) * zoom))
+    n2 = max(1, int(len(s2) * zoom))
+    t1 = np.arange(n1) / rate
+    t2 = np.arange(n2) / rate
+
+    zoom_label = f' (zoom={zoom})' if zoom < 1.0 else ''
+
+    if layout == 'overlap':
+        fig, ax = plt.subplots(figsize=(12, 4))
+        ax.plot(t1, s1[:n1], color=color1, linewidth=1.5, alpha=0.8, label=label1)
+        ax.plot(t2, s2[:n2], color=color2, linewidth=1.5, alpha=0.8, label=label2)
+        ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
+        ax.set_xlabel('Time (seconds)')
+        ax.set_ylabel('Amplitude')
+        ax.set_title(f'{label1} vs {label2}{zoom_label}')
+        ax.legend()
+        plt.tight_layout()
+        plt.show()
+    else:
+        fig, axes = plt.subplots(2, 1, figsize=(12, 5))
+        axes[0].plot(t1, s1[:n1], color=color1, linewidth=1.0)
+        axes[0].set_title(f'{label1}{zoom_label}')
+        axes[0].set_ylabel('Amplitude')
+        axes[0].axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
+
+        axes[1].plot(t2, s2[:n2], color=color2, linewidth=1.0)
+        axes[1].set_title(f'{label2}{zoom_label}')
+        axes[1].set_ylabel('Amplitude')
+        axes[1].axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
+        axes[1].set_xlabel('Time (seconds)')
+
+        plt.tight_layout()
+        plt.show()
+
+    print(f"{label1}:")
+    if normalize:
+        display(Audio(data=s1, rate=rate, normalize=True))
+    else:
+        display(Audio(data=s1.astype(np.float32) / 32768.0, rate=rate, normalize=False))
+    print(f"{label2}:")
+    if normalize:
+        display(Audio(data=s2, rate=rate, normalize=True))
+    else:
+        display(Audio(data=s2.astype(np.float32) / 32768.0, rate=rate, normalize=False))
+
+
+def play(signal, label='', rate=RATE):
+    """Play a single signal with an optional label."""
+    if label:
+        print(f"{label}:")
+    display(Audio(data=signal, rate=rate))
 ```
 
 ---
 
-## Phase 1: The Sound as a List (30 min)
+## Phase 1: The Sound as a List (20 min)
 
 Before we can analyze forensic recordings, we need to understand how a computer represents sound. At its core, every digital audio file is a **list of numbers** — each number records the air pressure at one instant in time. A microphone captures these measurements many thousands of times per second, and a WAV file stores them as a NumPy array.
 
@@ -85,54 +180,17 @@ print(f"Min: {hum.min()}, Max: {hum.max()}")
 
 ---
 
-### Exercise 1.2: Visualizing the Waveform
+### Exercise 1.2: Visualizing and Listening
 
-Numbers alone do not tell the whole story. We need to *see* the sound. A **waveform plot** shows amplitude (y-axis) vs. time in seconds (x-axis).
+Numbers alone do not tell the whole story. We need to *see* and *hear* the sound. Use `compare_sounds` to compare the left and right channels — this follows the **See-Then-Hear** pattern we will use for every transformation.
 
 ```python
-# Full waveform view (use left channel of stereo data)
+# Compare left vs right channels
 left_channel = data[:, 0]
-time_axis = np.arange(len(left_channel)) / rate
+right_channel = data[:, 1]
 
-fig, ax = plt.subplots(figsize=(12, 4))
-ax.plot(time_axis, left_channel, linewidth=0.5, color='steelblue')
-ax.set_xlabel('Time (seconds)')
-ax.set_ylabel('Amplitude')
-ax.set_title('Waveform: stereo_sample.wav (Left Channel)')
-ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-```
-
-**Zoomed View:** To see individual wave oscillations, plot only a small window (10 milliseconds):
-
-```python
-window = int(0.01 * rate)  # 10ms worth of samples
-t_window = np.arange(window) / rate * 1000  # Convert to milliseconds
-
-fig, ax = plt.subplots(figsize=(12, 4))
-ax.plot(t_window, left_channel[:window], linewidth=1.0, color='steelblue',
-        marker='.', markersize=4)
-ax.set_xlabel('Time (milliseconds)')
-ax.set_ylabel('Amplitude')
-ax.set_title('Zoomed View: First 10 ms')
-ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-```
-
-**Question:** What does a single "wave" look like up close? Why do the dots form a smooth curve even though they are discrete sample points?
-
----
-
-### Exercise 1.3: Listening to the Audio
-
-Waveform plots show us the *shape* of the sound, but we also need to *hear* it. `IPython.display.Audio` renders an HTML5 audio player directly in the notebook.
-
-```python
-# For stereo data, Audio expects shape (channels, N) — so transpose
-print("Stereo sample:")
-display(Audio(data=data.T, rate=rate))
+compare_sounds(left_channel, right_channel,
+               'Left Channel', 'Right Channel', rate=rate, zoom=0.05)
 ```
 
 **Convention (IMPORTANT):** From this point on, every transformation follows the **See-Then-Hear** pattern:
@@ -141,7 +199,9 @@ display(Audio(data=data.T, rate=rate))
 2. **See** — plot the waveform
 3. **Hear** — play the audio
 
-This dual verification is critical. A waveform might *look* correct but sound wrong (or vice versa). Always verify both ways.
+The `compare_sounds` helper combines steps 2 and 3 into a single call. Use `play` when you only need to hear one signal.
+
+**Question:** In the zoomed view, what does a single "wave" look like? Why do the sample points form a smooth curve even though they are discrete?
 
 ---
 
@@ -187,28 +247,10 @@ Dtype: int16
 </details>
 
 ```python
-# See-Then-Hear: compare stereo vs mono
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-time_axis = np.arange(len(mono)) / rate
-
-axes[0].plot(time_axis, data[:, 0], linewidth=0.5, color='steelblue')
-axes[0].set_title('Left Channel')
-axes[0].set_ylabel('Amplitude')
-axes[0].axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-
-axes[1].plot(time_axis, mono, linewidth=0.5, color='green')
-axes[1].set_title('Mono (Average of L+R)')
-axes[1].set_ylabel('Amplitude')
-axes[1].axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
-
-print("Stereo:")
-display(Audio(data=data.T, rate=rate))
-print("Mono:")
-display(Audio(data=mono, rate=rate))
+# See-Then-Hear: compare left channel vs mono result
+compare_sounds(data[:, 0], mono,
+               'Left Channel', 'Mono (Average of L+R)',
+               rate=rate, color2='green')
 ```
 
 From this point forward, we will use the mono version of our test audio. Let's assign it:
@@ -220,7 +262,7 @@ sample = to_mono(data)
 
 ---
 
-## Phase 2: The "Anti-Sound" & Volume (45 min)
+## Phase 2: The "Anti-Sound" & Volume (35 min)
 
 Now that we can load, visualize, and listen to audio, we move to our first transformations. Each effect maps directly to a **Precalculus function transformation** you already know — see the table in [`concepts.md`](concepts.md).
 
@@ -310,26 +352,15 @@ The loud version is clipped at the int16 boundaries because 20000 × 2 = 40000 >
 </details>
 
 ```python
-# See-Then-Hear: compare all three
-fig, axes = plt.subplots(3, 1, figsize=(12, 8), sharex=True)
-for ax, signal, title in zip(axes,
-    [sample, loud, quiet],
-    ['Original', 'Volume × 2.0 (clipped)', 'Volume × 0.3']):
-    t = np.arange(len(signal)) / rate
-    ax.plot(t, signal, linewidth=0.5, color='steelblue')
-    ax.set_title(title)
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
+# See-Then-Hear: loud vs original
+compare_sounds(sample, loud, 'Original', 'Volume × 2.0 (clipped)',
+               rate=rate, zoom=0.05, color2='darkorange')
+```
 
-print("Original:")
-display(Audio(data=sample, rate=rate))
-print("Louder (×2.0):")
-display(Audio(data=loud, rate=rate))
-print("Quieter (×0.3):")
-display(Audio(data=quiet, rate=rate))
+```python
+# See-Then-Hear: quiet vs original — overlapped to compare wave heights
+compare_sounds(sample, quiet, 'Original', 'Volume × 0.3',
+               rate=rate, layout='overlap', zoom=0.05, color2='darkorange')
 ```
 
 **Question:** What happens if you multiply by 10.0 without clipping? Why does it sound *distorted* rather than just very loud? (Hint: think about what happens when the wave peaks exceed ±32,767.)
@@ -353,26 +384,9 @@ inverted = -sample  # A single NumPy operation!
 ```
 
 ```python
-# See-Then-Hear: compare original vs inverted (zoomed to 10ms)
-window = int(0.01 * rate)
-t_win = np.arange(window) / rate * 1000  # milliseconds
-
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-axes[0].plot(t_win, sample[:window], color='steelblue', linewidth=1.5)
-axes[0].set_title('Original')
-axes[1].plot(t_win, inverted[:window], color='crimson', linewidth=1.5)
-axes[1].set_title('Phase Inverted (× -1)')
-for ax in axes:
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-    ax.set_ylabel('Amplitude')
-axes[-1].set_xlabel('Time (milliseconds)')
-plt.tight_layout()
-plt.show()
-
-print("Original:")
-display(Audio(data=sample, rate=rate))
-print("Inverted:")
-display(Audio(data=inverted, rate=rate))
+# See-Then-Hear: overlapped view clearly shows the mirror image
+compare_sounds(sample, inverted, 'Original', 'Phase Inverted (× -1)',
+               rate=rate, layout='overlap', zoom=0.02)
 ```
 
 **Discovery:** Listen carefully — they sound *identical*! The graph proves they are different (one is the mirror image of the other), but the human ear perceives amplitude *patterns*, not whether peaks are positive or negative. The waves look completely different but are perceptually indistinguishable.
@@ -442,12 +456,9 @@ axes[-1].set_xlabel('Time (milliseconds)')
 plt.tight_layout()
 plt.show()
 
-print("Hum:")
-display(Audio(data=hum_demo, rate=rate))
-print("Anti-Hum:")
-display(Audio(data=anti_hum, rate=rate))
-print("Sum (should be silent):")
-display(Audio(data=result.astype(np.int16), rate=rate))
+play(hum_demo, 'Hum')
+play(anti_hum, 'Anti-Hum')
+play(result.astype(np.int16), 'Sum (should be silent)')
 ```
 
 **Step 2: Forensic Application — Remove Hum from a Dirty Recording**
@@ -496,25 +507,10 @@ def cancel_noise(dirty, noise):
 # Test noise cancellation
 cleaned = cancel_noise(dirty, noise)
 
-# See-Then-Hear: before vs after
-fig, axes = plt.subplots(3, 1, figsize=(12, 8), sharex=True)
-for ax, signal, title, color in zip(axes,
-    [dirty, noise, cleaned],
-    ['Dirty Recording (Voice + Hum)', 'Known Noise (220 Hz Hum)', 'Cleaned (Dirty - Noise)'],
-    ['steelblue', 'crimson', 'green']):
-    t = np.arange(len(signal)) / rate
-    ax.plot(t, signal, linewidth=0.5, color=color)
-    ax.set_title(title)
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
-
-print("Dirty (voice buried in hum):")
-display(Audio(data=dirty, rate=rate))
-print("Cleaned (hum removed):")
-display(Audio(data=cleaned, rate=rate))
+# See-Then-Hear: dirty vs cleaned
+compare_sounds(dirty, cleaned,
+               'Dirty (Voice + Hum)', 'Cleaned (Dirty - Noise)',
+               rate=rate, color2='green')
 ```
 
 **Verification:** The cleaned audio should sound like the original sample with the hum removed.
@@ -523,7 +519,7 @@ display(Audio(data=cleaned, rate=rate))
 
 ---
 
-## Phase 3: The Grand Canyon Effect — Echo (45 min)
+## Phase 3: The Grand Canyon Effect — Echo (30 min)
 
 An echo happens when sound bounces off a surface (like a canyon wall) and reaches your ears a moment later. We can simulate this digitally by creating a delayed, quieter copy of the audio and mixing it with the original.
 
@@ -608,101 +604,24 @@ The output is longer than the input because the echo extends past the end of the
 </details>
 
 ```python
-# See-Then-Hear: compare original with both echo versions
-fig, axes = plt.subplots(3, 1, figsize=(12, 8))
-for ax, signal, title in zip(axes,
-    [sample, echo_short, echo_long],
-    ['Original', 'Echo (0.3s delay, 0.4 decay)', 'Echo (0.6s delay, 0.5 decay)']):
-    t = np.arange(len(signal)) / rate
-    ax.plot(t, signal, linewidth=0.5, color='steelblue')
-    ax.set_title(title)
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
+# See-Then-Hear: original vs short echo
+compare_sounds(sample, echo_short,
+               'Original (Dry)', 'Echo (0.3s delay, 0.4 decay)',
+               rate=rate, color2='darkorange')
+```
 
-print("Original:")
-display(Audio(data=sample, rate=rate))
-print("Echo (0.3s, 0.4 decay):")
-display(Audio(data=echo_short, rate=rate))
-print("Echo (0.6s, 0.5 decay):")
-display(Audio(data=echo_long, rate=rate))
+```python
+# See-Then-Hear: original vs long echo
+compare_sounds(sample, echo_long,
+               'Original (Dry)', 'Echo (0.6s delay, 0.5 decay)',
+               rate=rate, color2='darkorange')
 ```
 
 **Question:** What happens if `decay >= 1.0`? Why would this be a problem in a real audio system? (Hint: each echo would be as loud or louder than the original.)
 
 ---
 
-### Part C: Multi-Echo / Reverb (Bonus — 15 min)
-
-Real rooms produce many reflections. We can simulate reverb by stacking multiple echoes, each one delayed further and decayed more.
-
-**The Math:**
-
-```
-reverb(x) = f(x) + decay¹ × f(x - d) + decay² × f(x - 2d) + decay³ × f(x - 3d) + ...
-```
-
-Each successive echo is `decay` times quieter than the previous one.
-
-```python
-def add_reverb(data, rate, num_echoes=4, delay_seconds=0.15, decay=0.5):
-    """Add multiple decaying echoes to simulate room reverb.
-
-    Args:
-        data: NumPy array, dtype int16 (mono)
-        rate: int, sample rate
-        num_echoes: int, number of echo reflections
-        delay_seconds: float, delay between each reflection
-        decay: float, volume decay per reflection (compounds: decay^n)
-
-    Returns:
-        NumPy array, dtype int16
-    """
-    delay_samples = int(delay_seconds * rate)
-    total_delay = num_echoes * delay_samples
-    total_length = len(data) + total_delay
-
-    # TODO: Implement
-    # Start with the original, padded to total length
-    # result = np.zeros(total_length, dtype=np.float64)
-    # result[:len(data)] = data.astype(np.float64)
-    #
-    # For each echo n (1 to num_echoes):
-    #   offset = n * delay_samples
-    #   volume = decay ** n
-    #   result[offset:offset+len(data)] += data.astype(np.float64) * volume
-    #
-    # Clip and cast back to int16
-    pass
-```
-
-```python
-# Test reverb
-reverb = add_reverb(sample, rate, num_echoes=5, delay_seconds=0.1, decay=0.5)
-
-fig, axes = plt.subplots(2, 1, figsize=(12, 6))
-axes[0].plot(np.arange(len(sample)) / rate, sample, linewidth=0.5, color='steelblue')
-axes[0].set_title('Original (Dry)')
-axes[1].plot(np.arange(len(reverb)) / rate, reverb, linewidth=0.5, color='darkorange')
-axes[1].set_title('With Reverb (5 echoes, 0.1s spacing, 0.5 decay)')
-for ax in axes:
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
-
-print("Dry:")
-display(Audio(data=sample, rate=rate))
-print("Reverb:")
-display(Audio(data=reverb, rate=rate))
-```
-
----
-
-## Phase 4: Time Travel & Pitch (30 min)
+## Phase 4: Time Travel & Pitch (20 min)
 
 Array slicing gives us the power to manipulate time itself — playing audio backward and changing its speed.
 
@@ -728,26 +647,9 @@ reversed_audio = sample[::-1].copy()
 
 ```python
 # See-Then-Hear: forward vs backward
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-t = np.arange(len(sample)) / rate
-
-axes[0].plot(t, sample, linewidth=0.5, color='steelblue')
-axes[0].set_title('Original (Forward)')
-
-axes[1].plot(t, reversed_audio, linewidth=0.5, color='purple')
-axes[1].set_title('Reversed (Backward)')
-
-for ax in axes:
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
-
-print("Forward:")
-display(Audio(data=sample, rate=rate))
-print("Reversed:")
-display(Audio(data=reversed_audio, rate=rate))
+compare_sounds(sample, reversed_audio,
+               'Original (Forward)', 'Reversed (Backward)',
+               rate=rate, color2='purple')
 ```
 
 **Discovery:** Reversed audio sounds alien and unrecognizable — but the waveform is simply the mirror image read from right to left.
@@ -818,78 +720,22 @@ Doubling the speed halves the number of samples (and duration). Halving the spee
 </details>
 
 ```python
-# See-Then-Hear: compare all three
-fig, axes = plt.subplots(3, 1, figsize=(12, 8))
-for ax, signal, title in zip(axes,
-    [sample, fast, slow],
-    ['Original (1.0×)', 'Fast (2.0× speed, higher pitch)', 'Slow (0.5× speed, lower pitch)']):
-    t = np.arange(len(signal)) / rate
-    ax.plot(t, signal, linewidth=0.5, color='steelblue')
-    ax.set_title(title)
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
+# See-Then-Hear: original vs fast
+compare_sounds(sample, fast, 'Original (1.0×)', 'Fast (2.0× — chipmunk)',
+               rate=rate, color2='darkorange')
+```
 
-print("Original:")
-display(Audio(data=sample, rate=rate))
-print("2× Speed (chipmunk):")
-display(Audio(data=fast, rate=rate))
-print("0.5× Speed (slow-mo):")
-display(Audio(data=slow, rate=rate))
+```python
+# See-Then-Hear: original vs slow
+compare_sounds(sample, slow, 'Original (1.0×)', 'Slow (0.5× — slow-mo)',
+               rate=rate, color2='darkorange')
 ```
 
 **Question:** Why does speeding up audio also raise the pitch? (Hint: the same number of oscillations are squeezed into less time, which means more vibrations per second = higher frequency.)
 
 ---
 
-### Part C: Saving Processed Audio (10 min)
-
-**Goal:** Save any transformation back to a WAV file using `wavfile.write()`.
-
-```python
-def save_audio(filename, data, rate):
-    """Save audio data to a WAV file.
-
-    Args:
-        filename: str, output file path
-        data: NumPy array, dtype int16
-        rate: int, sample rate in Hz
-    """
-    wavfile.write(filename, rate, data.astype(np.int16))
-```
-
-**Task:** Save the reversed audio and the echo version:
-
-```python
-save_audio('data/reversed_output.wav', reversed_audio, rate)
-save_audio('data/echo_output.wav', echo_short, rate)
-
-print("Files saved:")
-print("  data/reversed_output.wav")
-print("  data/echo_output.wav")
-```
-
-**Verification:** Load the saved files back and confirm they match:
-
-```python
-# Round-trip test
-rate_check, loaded = wavfile.read('data/reversed_output.wav')
-print(f"Saved and loaded match: {np.array_equal(reversed_audio, loaded)}")
-```
-
-<details>
-<summary>Expected Output</summary>
-
-```
-Saved and loaded match: True
-```
-</details>
-
----
-
-## Phase 5: Critical Incident — "The Ghost in the Machine" (30 min)
+## Phase 5: Critical Incident — "The Ghost in the Machine" (25 min)
 
 **The Escalation:** A recording (`mystery.wav`) recovered from a suspect's laptop produces only an unpleasant hum when played. Intelligence suggests the original voice message was **reversed** and **buried under a loud synthetic hum** to prevent casual listening. A clean sample of the hum (`pure_hum.wav`) was found in the same directory.
 
@@ -912,19 +758,8 @@ print(f"Min: {mystery.min()}, Max: {mystery.max()}")
 ```
 
 ```python
-# Visualize the raw mystery recording
-fig, ax = plt.subplots(figsize=(12, 4))
-t = np.arange(len(mystery)) / rate_m
-ax.plot(t, mystery, linewidth=0.5, color='steelblue')
-ax.set_title('Mystery Recording — Raw')
-ax.set_xlabel('Time (seconds)')
-ax.set_ylabel('Amplitude')
-ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-
-print("Mystery (raw):")
-display(Audio(data=mystery, rate=rate_m))
+# Listen to the raw mystery recording
+play(mystery, 'Mystery (raw)')
 ```
 
 **Observation:** Can you hear anything intelligible? The waveform looks like a regular sine wave (the hum) with some disturbance. The hum dominates.
@@ -951,24 +786,10 @@ cleaned = cancel_noise(mystery, pure_hum)
 ```
 
 ```python
-# Visualize before/after cancellation
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-
-axes[0].plot(np.arange(len(mystery)) / rate_m, mystery, linewidth=0.5, color='steelblue')
-axes[0].set_title('Before: Mystery (Voice + Hum)')
-
-axes[1].plot(np.arange(len(cleaned)) / rate_m, cleaned, linewidth=0.5, color='green')
-axes[1].set_title('After: Hum Cancelled')
-
-for ax in axes:
-    ax.set_ylabel('Amplitude')
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-axes[-1].set_xlabel('Time (seconds)')
-plt.tight_layout()
-plt.show()
-
-print("After hum cancellation:")
-display(Audio(data=cleaned, rate=rate_m))
+# See-Then-Hear: before vs after cancellation
+compare_sounds(mystery, cleaned,
+               'Before (Voice + Hum)', 'After (Hum Cancelled)',
+               rate=rate_m, color2='green')
 ```
 
 **Observation:** The hum should be gone, but the remaining audio still sounds strange — it is played backward!
@@ -987,19 +808,8 @@ recovered = cleaned[::-1].copy()
 ```
 
 ```python
-# Listen to the reversed result
-fig, ax = plt.subplots(figsize=(12, 4))
-t = np.arange(len(recovered)) / rate_m
-ax.plot(t, recovered, linewidth=0.5, color='purple')
-ax.set_title('Reversed — Can You Hear the Message?')
-ax.set_xlabel('Time (seconds)')
-ax.set_ylabel('Amplitude')
-ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-
-print("Reversed:")
-display(Audio(data=recovered, rate=rate_m))
+# Listen — can you hear the message now?
+play(recovered, 'Reversed')
 ```
 
 **Observation:** You should be able to hear speech now, but it may be very quiet.
@@ -1024,19 +834,10 @@ final = adjust_volume(recovered, boost_factor)
 ```
 
 ```python
-# Final result — the recovered message
-fig, ax = plt.subplots(figsize=(12, 4))
-t = np.arange(len(final)) / rate_m
-ax.plot(t, final, linewidth=0.5, color='green')
-ax.set_title('RECOVERED MESSAGE')
-ax.set_xlabel('Time (seconds)')
-ax.set_ylabel('Amplitude')
-ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-
-print("RECOVERED MESSAGE:")
-display(Audio(data=final, rate=rate_m))
+# See-Then-Hear: the full journey — mystery vs recovered
+compare_sounds(mystery, final,
+               'Mystery (Raw)', 'RECOVERED MESSAGE',
+               rate=rate_m, color2='green')
 ```
 
 **Task:** Listen carefully and transcribe the recovered message. Write it down in [`submission.md`](submission.md).
@@ -1083,11 +884,10 @@ def recover_message(mystery_path, hum_path):
 recovered_final, rate_final = recover_message('data/mystery.wav', 'data/pure_hum.wav')
 
 # Save the recovered message
-save_audio('data/recovered_message.wav', recovered_final, rate_final)
+wavfile.write('data/recovered_message.wav', rate_final, recovered_final.astype(np.int16))
 
 print("Recovered message saved to data/recovered_message.wav")
-print("\nFinal playback:")
-display(Audio(data=recovered_final, rate=rate_final))
+play(recovered_final, 'Final playback')
 ```
 
 ---
@@ -1097,8 +897,8 @@ display(Audio(data=recovered_final, rate=rate_final))
 Congratulations, analyst. You have:
 
 1. **Loaded** WAV audio files as NumPy arrays and understood mono vs. stereo structure.
-2. **Visualized** waveforms with proper time axes and played audio directly in the notebook.
-3. **Built** five audio effects from scratch using only array math — volume control, phase inversion, noise cancellation, echo, and reversal.
+2. **Used** the `compare_sounds` / `play` toolkit to verify every transformation visually and audibly.
+3. **Built** five audio effects from scratch using only array math — volume control, phase inversion, noise cancellation, echo, and speed/pitch change.
 4. **Discovered** the int16 overflow trap (the audio equivalent of Lab 04's uint8 overflow).
 5. **Recovered** a hidden spoken message using a multi-step forensic pipeline.
 
