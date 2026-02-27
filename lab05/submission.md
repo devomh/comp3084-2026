@@ -88,11 +88,6 @@
 
 ## Section E: Bonus (if attempted)
 
-### Multi-Echo Reverb
-- [ ] add_reverb() function implemented
-- [ ] Compounding decay (decay^n) across N echoes
-- [ ] Verified by playback
-
 ### Speed Change (Interpolation)
 - [ ] np.interp used for smooth resampling
 - [ ] Tested with non-integer factor (e.g., 1.5)

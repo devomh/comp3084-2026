@@ -1,6 +1,6 @@
 # Lab 05 Field Manual: Digital Waves
 
-**COMP3084 — Data Processing & Analysis**
+**Data Processing & Analysis**
 
 This document is your technical reference for Lab 05. It covers the foundational
 concepts you will need to understand before and during the lab exercises: how
@@ -20,9 +20,14 @@ same math from your Precalculus course.
 Run this cell first. Every code cell in this document depends on these imports.
 
 ```python
+!pip install -q mermaid-py
+```
+
+```python
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import Audio, display
+from mermaid import Mermaid
 ```
 
 ---
@@ -37,7 +42,8 @@ air pressure that travel outward. When these pressure waves reach your ear,
 your eardrum vibrates in response, and your brain interprets those vibrations
 as sound.
 
-```mermaid
+```python
+Mermaid("""
 flowchart LR
     A["Source<br/>(vibrating object)"] -->|"pushes air"| B["Pressure Wave<br/>(travels through air)"]
     B -->|"reaches ear"| C["Eardrum<br/>(vibrates)"]
@@ -45,6 +51,7 @@ flowchart LR
 
     style A fill:#ffe1e1
     style D fill:#e1f5ff
+""")
 ```
 
 ### Amplitude and Frequency
@@ -156,13 +163,15 @@ Instead, a device called an **Analog-to-Digital Converter (ADC)** measures the
 voltage at regular intervals and records each measurement as a number. This
 process is called **sampling**.
 
-```mermaid
+```python
+Mermaid("""
 flowchart LR
     A["Analog Signal<br/>(continuous voltage)"] -->|"measure at<br/>regular intervals"| B["Samples<br/>(list of numbers)"]
     B -->|"store in file"| C["WAV File<br/>(digital audio)"]
 
     style A fill:#ffe1e1
     style C fill:#e1f5ff
+""")
 ```
 
 ### Sample Rate
@@ -270,7 +279,8 @@ mono = ((data[:, 0].astype(np.float64) + data[:, 1].astype(np.float64)) / 2).ast
 
 ### Stereo vs Mono Structure
 
-```mermaid
+```python
+Mermaid("""
 block-beta
     columns 2
     A["Left Channel<br/>(N samples)"] B["Right Channel<br/>(N samples)"]
@@ -278,15 +288,18 @@ block-beta
 
     style A fill:#ff6b6b
     style B fill:#339af0
+""")
 ```
 
-```mermaid
+```python
+Mermaid("""
 block-beta
     columns 1
     A["Single Channel<br/>(N samples)"]
     B["Mono: shape (N,)"]
 
     style A fill:#51cf66
+""")
 ```
 
 ### Duration Formula
@@ -1104,7 +1117,8 @@ result[i] = original_padded[i] + decay * delayed[i]
 
 ### Echo Diagram
 
-```mermaid
+```python
+Mermaid("""
 flowchart TD
     A["Original Signal"] --> B["Pad end with zeros<br/>(extend length)"]
     A --> C["Pad start with zeros<br/>(create delay)"]
@@ -1115,6 +1129,7 @@ flowchart TD
 
     style A fill:#e1f5ff
     style F fill:#90EE90
+""")
 ```
 
 ### Hearing Echo on a Melody
@@ -1165,7 +1180,8 @@ Each successive echo is `decay` times quieter than the previous one. After
 The following diagram shows the flow of audio through the different processing
 paths in this lab:
 
-```mermaid
+```python
+Mermaid("""
 flowchart LR
     A["Load WAV<br/>scipy -> NumPy"] --> B["Visualize<br/>(waveform plot)"]
     A --> C["Listen<br/>(Audio widget)"]
@@ -1183,6 +1199,7 @@ flowchart LR
 
     style A fill:#e1f5ff
     style K fill:#ffe1e1
+""")
 ```
 
 Each arrow represents a function you will implement. The **Critical Incident**

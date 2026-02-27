@@ -127,7 +127,7 @@ def play(signal, label='', rate=RATE):
 
 ---
 
-## Phase 1: The Sound as a List (20 min)
+## Phase 1: The Sound as a List
 
 Before we can analyze forensic recordings, we need to understand how a computer represents sound. At its core, every digital audio file is a **list of numbers** — each number records the air pressure at one instant in time. A microphone captures these measurements many thousands of times per second, and a WAV file stores them as a NumPy array.
 
@@ -205,7 +205,7 @@ The `compare_sounds` helper combines steps 2 and 3 into a single call. Use `play
 
 ---
 
-### Exercise 1.4: Stereo-to-Mono Conversion
+### Exercise 1.3: Stereo-to-Mono Conversion
 
 Stereo audio has two channels (left and right). For simplicity, all our processing will work on **mono** (single-channel) audio. To convert, we average the two channels.
 
@@ -262,13 +262,13 @@ sample = to_mono(data)
 
 ---
 
-## Phase 2: The "Anti-Sound" & Volume (35 min)
+## Phase 2: The "Anti-Sound" & Volume
 
 Now that we can load, visualize, and listen to audio, we move to our first transformations. Each effect maps directly to a **Precalculus function transformation** you already know — see the table in [`concepts.md`](concepts.md).
 
 ---
 
-### Part A: Volume Control — Vertical Scaling (15 min)
+### Part A: Volume Control — Vertical Scaling
 
 **Goal:** Adjust the volume of a sound by multiplying every sample by a scalar.
 
@@ -367,7 +367,7 @@ compare_sounds(sample, quiet, 'Original', 'Volume × 0.3',
 
 ---
 
-### Part B: Phase Inversion — The Mirror Wave (10 min)
+### Part B: Phase Inversion — The Mirror Wave
 
 **Goal:** Multiply the signal by -1 to flip it across the x-axis.
 
@@ -393,7 +393,7 @@ compare_sounds(sample, inverted, 'Original', 'Phase Inverted (× -1)',
 
 ---
 
-### Part C: Noise Cancellation — Destructive Interference (20 min)
+### Part C: Noise Cancellation — Destructive Interference
 
 **Goal:** Demonstrate that adding a signal to its inverse produces silence (all zeros), then apply this forensically to remove a hum from a contaminated recording.
 
@@ -482,6 +482,13 @@ print(f"Noise shape: {noise.shape}")
 print(f"Dirty shape: {dirty.shape}")
 ```
 
+```python
+# See-Then-Hear: original voice vs dirty (voice + hum)
+compare_sounds(sample, dirty,
+               'Original Voice', 'Dirty (Voice + Hum)',
+               rate=rate, color2='crimson')
+```
+
 **Task:** Implement `cancel_noise()` — subtract the known noise from the dirty recording.
 
 ```python
@@ -519,13 +526,13 @@ compare_sounds(dirty, cleaned,
 
 ---
 
-## Phase 3: The Grand Canyon Effect — Echo (30 min)
+## Phase 3: The Grand Canyon Effect — Echo
 
 An echo happens when sound bounces off a surface (like a canyon wall) and reaches your ears a moment later. We can simulate this digitally by creating a delayed, quieter copy of the audio and mixing it with the original.
 
 ---
 
-### Part A: Understanding Echo (10 min)
+### Part A: Understanding Echo
 
 **The Math (Precalculus: Horizontal Translation + Vertical Scaling):**
 
@@ -550,7 +557,7 @@ Both arrays are the same total length. The delayed version is just the original 
 
 ---
 
-### Part B: Implementing Echo (20 min)
+### Part B: Implementing Echo
 
 ```python
 def add_echo(data, rate, delay_seconds=0.3, decay=0.4):
@@ -621,13 +628,13 @@ compare_sounds(sample, echo_long,
 
 ---
 
-## Phase 4: Time Travel & Pitch (20 min)
+## Phase 4: Time Travel & Pitch
 
 Array slicing gives us the power to manipulate time itself — playing audio backward and changing its speed.
 
 ---
 
-### Part A: Reversal — Playing Backwards (10 min)
+### Part A: Reversal — Playing Backwards
 
 **Goal:** Reverse the entire audio signal using array slicing.
 
@@ -656,7 +663,7 @@ compare_sounds(sample, reversed_audio,
 
 ---
 
-### Part B: Speed & Pitch — Skipping Samples (10 min)
+### Part B: Speed & Pitch — Skipping Samples
 
 **Goal:** Change playback speed (and pitch) by resampling the array.
 
@@ -735,7 +742,7 @@ compare_sounds(sample, slow, 'Original (1.0×)', 'Slow (0.5× — slow-mo)',
 
 ---
 
-## Phase 5: Critical Incident — "The Ghost in the Machine" (25 min)
+## Phase 5: Critical Incident — "The Ghost in the Machine"
 
 **The Escalation:** A recording (`mystery.wav`) recovered from a suspect's laptop produces only an unpleasant hum when played. Intelligence suggests the original voice message was **reversed** and **buried under a loud synthetic hum** to prevent casual listening. A clean sample of the hum (`pure_hum.wav`) was found in the same directory.
 
@@ -743,7 +750,7 @@ Your mission: **recover the hidden message using the toolkit you just built.**
 
 ---
 
-### Step 1: Initial Assessment (5 min)
+### Step 1: Initial Assessment
 
 Load and inspect the mystery recording. What do you see? What do you hear?
 
@@ -766,7 +773,7 @@ play(mystery, 'Mystery (raw)')
 
 ---
 
-### Step 2: Cancel the Hum (10 min)
+### Step 2: Cancel the Hum
 
 Load the pure hum file and subtract it from the mystery recording.
 
@@ -796,7 +803,7 @@ compare_sounds(mystery, cleaned,
 
 ---
 
-### Step 3: Reverse the Cleaned Signal (5 min)
+### Step 3: Reverse the Cleaned Signal
 
 The hidden message was recorded backward. Flip it.
 
@@ -816,7 +823,7 @@ play(recovered, 'Reversed')
 
 ---
 
-### Step 4: Boost the Volume (5 min)
+### Step 4: Boost the Volume
 
 Scale the recovered signal so it is clearly audible.
 
@@ -844,7 +851,7 @@ compare_sounds(mystery, final,
 
 ---
 
-### Step 5: The Full Recovery Pipeline (5 min)
+### Step 5: The Full Recovery Pipeline
 
 Now combine everything into a single function — this is your complete forensic audio recovery tool.
 
@@ -873,7 +880,8 @@ def recover_message(mystery_path, hum_path):
     # Step 3: Reverse using [::-1].copy()
 
     # Step 4: Boost volume using adjust_volume()
-    #   (calculate boost factor from peak amplitude)
+    #   peak = max(abs(recovered.min()), abs(recovered.max()))
+    #   boost_factor = 30000 / peak  — scale the peak to ~30000 (leaving headroom)
 
     # Step 5: Return (recovered_data, sample_rate)
     pass

@@ -81,7 +81,7 @@ ls data/
 Open [`lab05.md`](lab05.md) (or [`lab05.ipynb`](lab05.ipynb) in Jupyter/Colab) for
 the guided exercises. Consult [`concepts.md`](concepts.md) for technical background.
 
-### Phase 1: The Sound as a List (30 min)
+### Phase 1: The Sound as a List (20 min)
 
 **Objective:** Understand how digital audio maps to a NumPy array.
 
@@ -97,7 +97,7 @@ fixed rate. A stereo sound has two columns — left and right.
 
 ---
 
-### Phase 2: The "Anti-Sound" & Volume (45 min)
+### Phase 2: The "Anti-Sound" & Volume (35 min)
 
 **Objective:** Apply scalar multiplication and additive inverse to audio signals.
 
@@ -128,7 +128,7 @@ to reveal the voice underneath.
 
 ---
 
-### Phase 3: The Grand Canyon Effect — Echo (45 min)
+### Phase 3: The Grand Canyon Effect — Echo (30 min)
 
 **Objective:** Build an echo effect using array concatenation and mixing.
 
@@ -137,7 +137,7 @@ to reveal the voice underneath.
 An echo is `f(x) + decay × f(x - delay)` — a horizontal shift (delay) combined
 with vertical scaling (decay).
 
-#### Part B: Single Echo (20 min)
+#### Part B: Implementing Echo (20 min)
 
 Implement `add_echo()` by padding with zeros and mixing:
 
@@ -147,14 +147,9 @@ original_padded = np.concatenate([data, np.zeros(delay_samples)])
 result = original_padded + decay * delayed
 ```
 
-#### Part C: Multi-Echo Reverb (15 min)
-
-Stack multiple decaying echoes to simulate room reverb. Each reflection is
-quieter: `decay^n`.
-
 ---
 
-### Phase 4: Time Travel & Pitch (30 min)
+### Phase 4: Time Travel & Pitch (20 min)
 
 **Objective:** Reverse and resample audio using array slicing.
 
@@ -165,7 +160,7 @@ quieter: `decay^n`.
 
 ---
 
-### Phase 5: Critical Incident — "The Ghost in the Machine" (30 min)
+### Phase 5: Critical Incident — "The Ghost in the Machine" (25 min)
 
 **Objective:** Recover a hidden spoken message from `data/mystery.wav`.
 
@@ -236,7 +231,6 @@ Complete [`submission.md`](submission.md) with:
 
 | Component | Points | Criteria |
 |-----------|--------|----------|
-| Multi-Echo Reverb | +5 | Compounding decay across N echoes |
 | Speed Change (interpolation) | +5 | Smooth resampling using `np.interp` |
 | Fade In/Out Effect | +5 | Linear amplitude ramp at start/end |
 
@@ -270,22 +264,6 @@ Complete [`submission.md`](submission.md) with:
 6. **Use `.copy()` after reversal:** `data[::-1]` creates a *view* with
    negative strides, which can cause issues with `wavfile.write()`. Use
    `data[::-1].copy()` to get a contiguous array.
-
----
-
-## Academic Integrity Reminder
-
-Audio forensics is a real discipline used in law enforcement and intelligence.
-You must:
-
-- Understand every transformation you implement and explain the math behind it
-- Be able to explain why `signal + (-signal) = 0` and how this enables noise
-  cancellation
-- Explain how echo maps to horizontal translation in function notation
-- Document any AI assistance in the AI Usage Appendix
-
-**Remember:** In a real forensic investigation, presenting results you cannot
-explain or verify is inadmissible. Build it, understand it, own it.
 
 ---
 
