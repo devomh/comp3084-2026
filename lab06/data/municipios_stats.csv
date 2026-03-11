@@ -1,0 +1,79 @@
+municipio,region,poblacion,area_km2,ingreso_mediano,tasa_pobreza
+San Juan,Metro,318441,123.9,39522,15.0
+Bayamón,Metro,169269,114.5,31143,15.5
+Carolina,Metro,146937,118.2,31778,20.4
+Guaynabo,Metro,84214,70.3,28120,26.4
+Trujillo Alto,Metro,63674,53.5,26510,28.3
+Toa Baja,Metro,75227,60.2,28215,25.6
+Toa Alta,Metro,63927,109.6,26973,32.1
+Cataño,Metro,24888,12.6,26181,30.4
+Canóvanas,Metro,43335,85.6,26477,30.3
+Loíza,Metro,23072,50.6,24186,34.7
+Arecibo,Norte,81966,326.2,21688,40.4
+Barceloneta,Norte,22585,47.4,17465,48.9
+Camuy,Norte,30982,119.8,19206,42.4
+Dorado,Norte,36141,59.8,19669,42.7
+Florida,Norte,11160,39.3,16730,48.4
+Hatillo,Norte,38648,108.0,18169,41.3
+Manatí,Norte,38235,117.5,18340,43.8
+Morovis,Norte,30577,100.8,19044,41.4
+Quebradillas,Norte,23140,59.3,18953,42.5
+Vega Alta,Norte,34973,71.7,17663,46.7
+Vega Baja,Norte,50023,119.4,20587,46.2
+Ponce,Sur,126327,297.8,22340,42.5
+Coamo,Sur,37596,202.2,19729,46.9
+Guayama,Sur,37232,168.3,18295,52.2
+Guayanilla,Sur,17623,66.4,15585,49.8
+Juana Díaz,Sur,44423,155.6,18253,48.0
+Peñuelas,Sur,17977,117.2,17037,48.5
+Salinas,Sur,25430,180.0,18506,53.4
+Santa Isabel,Sur,21209,88.3,16289,46.9
+Villalba,Sur,21342,92.5,16247,47.2
+Yauco,Sur,33575,176.6,18214,50.1
+Arroyo,Sur,16926,39.1,17982,51.3
+Patillas,Sur,15509,120.7,18561,50.1
+Humacao,Este,50653,114.9,20796,42.9
+Ceiba,Este,10904,74.5,17271,46.4
+Culebra,Este,1714,30.1,17390,53.3
+Fajardo,Este,30476,77.3,19319,46.8
+Juncos,Este,37165,68.5,17792,44.7
+Las Piedras,Este,36110,87.0,18175,50.2
+Luquillo,Este,17665,67.0,18742,47.4
+Maunabo,Este,10321,54.8,16378,49.5
+Naguabo,Este,25070,134.8,16250,46.6
+Río Grande,Este,47292,157.1,19545,43.7
+Vieques,Este,8249,135.3,16070,45.5
+Yabucoa,Este,30426,142.3,17104,44.5
+Mayagüez,Oeste,67381,201.4,20633,40.5
+Aguada,Oeste,37516,79.7,19531,47.1
+Aguadilla,Oeste,52162,94.1,19794,40.4
+Añasco,Oeste,25480,101.1,19537,47.6
+Cabo Rojo,Oeste,47515,182.4,19724,41.8
+Hormigueros,Oeste,15267,29.4,19442,46.1
+Isabela,Oeste,39987,143.3,18739,40.7
+Lajas,Oeste,22156,154.2,18918,47.5
+Las Marías,Oeste,7874,119.6,19177,44.8
+Maricao,Oeste,4925,95.5,16235,45.1
+Moca,Oeste,33584,130.5,19938,40.1
+Rincón,Oeste,13656,36.4,18987,47.7
+Sabana Grande,Oeste,22147,91.4,16681,46.7
+San Germán,Oeste,30227,141.1,18289,44.0
+Caguas,Central,124606,152.5,20888,42.7
+Aguas Buenas,Central,24454,77.5,15841,47.8
+Aibonito,Central,22106,81.2,17571,48.7
+Barranquitas,Central,26563,88.7,17348,48.6
+Cayey,Central,42480,134.6,18150,45.7
+Cidra,Central,37104,93.3,17590,47.8
+Comerío,Central,17940,72.0,18319,51.8
+Corozal,Central,33117,110.2,15742,51.3
+Gurabo,Central,48593,72.5,17653,49.6
+Naranjito,Central,27349,71.5,17283,50.6
+Orocovis,Central,19688,164.8,17556,47.7
+Ciales,Central,15374,172.0,16599,52.4
+Jayuya,Central,13693,115.1,17563,52.9
+Adjuntas,Central,17185,172.4,16863,54.8
+Lares,Central,24473,159.3,18536,53.8
+Utuado,Central,26512,297.9,18386,47.1
+San Sebastián,Central,35068,182.4,18251,48.5
+San Lorenzo,Central,35286,138.1,16826,47.7
+Guánica,Central,13962,96.1,17141,52.8
