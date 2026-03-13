@@ -1,8 +1,29 @@
 # Lab 06: The Data Lake
 
+**Pre-Lab — CSV & pandas Intro**: [![Open Pre-Lab In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/devomh/comp3084-2026/blob/main/lab06/csv_pandas.ipynb)
+
 **Concepts**: [![Open Concepts In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/devomh/comp3084-2026/blob/main/lab06/concepts.ipynb)
 
 **Lab06**: [![Open Lab Notebook In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/devomh/comp3084-2026/blob/main/lab06/lab06.ipynb)
+
+---
+
+## Pre-Lab: CSV Files & Introduction to pandas
+
+Before diving into the full lab, complete the **Pre-Lab activity**
+([`csv_pandas.md`](csv_pandas.md)) to build foundational skills:
+
+- **Part 1 — Manual CSV parsing:** Read and process a CSV file using only
+  built-in Python (`open`, `split`, loops). This builds intuition for what
+  the CSV format actually is and why manual processing is tedious.
+- **Part 2 — pandas basics:** Learn to load data with `pd.read_csv()`,
+  inspect DataFrames, and replicate every manual operation from Part 1 in a
+  single pandas expression.
+
+This activity bridges the gap between raw Python and the pandas-powered
+analysis you will do in the main lab.
+
+---
 
 ## Case Brief
 
