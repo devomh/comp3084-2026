@@ -225,6 +225,7 @@ pandas provides two main accessors for selecting rows and columns:
 ```python
 df.loc[0, 'municipio']                     # Single cell by label
 df.loc[0:4, ['municipio', 'poblacion']]    # Rows 0-4, specific columns
+mask = df['poblacion'] > 50000             # Boolean mask: municipalities with pop > 50,000
 df.loc[mask, 'poblacion']                  # Filtered rows, one column
 ```
 
@@ -414,14 +415,14 @@ print(region_summary)
 
 What would have required this in NumPy:
 
-```python
+~~~python
 # NumPy approach (manual, error-prone)
 regions = np.unique(arr[:, region_col])
 for r in regions:
     mask = arr[:, region_col] == r
     total = arr[mask, pop_col].astype(int).sum()
     print(f"{r}: {total}")
-```
+~~~
 
 Becomes a single line in pandas:
 
@@ -482,7 +483,7 @@ print(df['tamano'].value_counts())
 ```
 
 This divides the population into bins and labels each municipality accordingly.
-Bins are: 0-20k (Pequeño), 20k-50k (Mediano), 50k-100k (Grande), 100k+
+Bins are: (0-20k] (Pequeño), (20k-50k] (Mediano), (50k-100k] (Grande), 100k+
 (Metrópoli).
 
 ---
@@ -555,12 +556,47 @@ where $\mu$ is the mean and $\sigma$ is the standard deviation.
 
 ### Computing Z-Scores in pandas
 
+The pattern is always the same: subtract the mean, divide by the standard
+deviation. To build intuition, here is a self-contained example using classroom
+heights (in inches) before applying the same logic to municipal data:
+
 ```python
-mean = series.mean()
-std = series.std()
-z_scores = (series - mean) / std
+# Toy example: 20 classroom heights (inches)
+# Most cluster around 65-70 in; 77 and 58 are intentional outliers
+heights = np.array([67, 66, 68, 69, 67, 66, 68, 70, 68, 67,
+                    69, 70, 65, 68, 68, 67, 77, 58, 68, 69])
+
+s = pd.Series(heights, name='height_in')
+
+mean = s.mean()
+std  = s.std()
+
+print(f"Mean: {mean:.1f} in")
+print(f"Std:  {std:.1f} in\n")
+
+z_scores = (s - mean) / std
+
+df_heights = pd.DataFrame({
+    'height_in': s,
+    'z_score':   z_scores.round(2)
+})
+
+print(df_heights.to_string())
 
 # Flag outliers
+outliers = df_heights[z_scores.abs() > 2]
+print("\nOutliers (|z| > 2):")
+print(outliers)
+```
+
+The same three-line pattern applies to any Series — swap `heights` for a
+column of municipal electricity consumption and the logic is identical:
+
+```python
+mean = series.mean()
+std  = series.std()
+z_scores = (series - mean) / std
+
 outliers = z_scores[z_scores.abs() > 2]
 ```
 
@@ -583,7 +619,7 @@ fair comparison across all municipalities regardless of size.
 | **`.loc`** | Label-based selection (inclusive slicing) |
 | **`.iloc`** | Position-based selection (exclusive slicing, like NumPy) |
 | **Boolean mask** | `df[df['col'] > val]` — same pattern as NumPy |
-| **`&` `|` `~`** | Combine masks — always use parentheses around conditions |
+| **`&` `\|` `~`** | Combine masks — always use parentheses around conditions |
 | **`.sort_values()`** | Sort by one or more columns |
 | **`.rank()`** | Assign ranks within a column |
 | **`.groupby()`** | Split-apply-combine: group → aggregate → result |

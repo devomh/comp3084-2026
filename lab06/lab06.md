@@ -77,7 +77,7 @@ The shape `(78, 6)` tells us there are 78 municipalities and 6 columns. Notice t
 
 ```python
 # TODO: Display the full info summary
-df.info()
+
 ```
 
 **Discovery Task:** How many municipalities are in the dataset? Which columns are numeric and which are text? Record your answers in [`submission.md`](submission.md).
@@ -519,12 +519,13 @@ Raw consumption totals are misleading — larger municipalities naturally consum
 stats = pd.read_csv('data/municipios_stats.csv').set_index('municipio')
 
 # TODO: Compute per-capita annual consumption
-# For each municipality in 'annual':
-#   per_capita = annual_kwh / population
+#               annual_kwh / population
 #
-# Hint: stats.loc[municipio_name, 'poblacion'] gives the population
-#       Or use: per_capita = annual / stats['poblacion']
-#       (pandas aligns by index automatically!)
+# Hint: The answer is one line. The setup line above already did the hard work —
+#       look at what set_index('municipio') produces and what 'annual's index
+#       looks like after groupby. Per-capita annual consumption is simply annual
+#       consumption divided by population; the only question is how to make pandas
+#       pair each municipality's consumption with its own population automatically.
 
 per_capita = None  # Replace with your code
 
@@ -555,10 +556,6 @@ A **z-score** measures how many standard deviations a value is from the mean. Va
 ```python
 # TODO: Compute z-scores for per-capita consumption
 # z = (value - mean) / std
-#
-# mean = per_capita.mean()
-# std = per_capita.std()
-# z_scores = (per_capita - mean) / std
 
 z_scores = None  # Replace with your code
 
@@ -601,7 +598,7 @@ print(f"Ratio to average: {anomaly_consumption / avg_consumption:.1f}x")
 Create a visualization that clearly shows the anomaly.
 
 ```python
-# TODO: Create a bar chart comparing the anomalous municipality
+# Create a bar chart comparing the anomalous municipality
 # against the overall distribution
 #
 # Option A: Bar chart of top 15 per-capita consumers
@@ -679,7 +676,3 @@ Every operation has a NumPy parallel:
 - [ ] Ensure all notebook cells run without errors from top to bottom
 - [ ] Verify the anomaly is correctly identified and explained
 - [ ] Include the AI Usage Appendix if applicable
-
-### Looking Ahead
-
-The DataFrame skills you practiced here — selection, filtering, grouping, aggregation — are the foundation of all data analysis. In Lab 09, you will extend these skills to **multi-table operations** (merging, joining) when data lives across multiple files. For now, you have mastered the single-table toolkit.
