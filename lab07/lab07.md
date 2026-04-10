@@ -61,7 +61,7 @@ def show_partition_sizes(rdd, label="RDD"):
 
 
 def normalize_word(word):
-    """Lowercase and remove non-letter characters at the edges."""
+    """Lowercase and remove non-letter characters."""
     return re.sub(r"[^a-z]", "", word.lower())
 ```
 

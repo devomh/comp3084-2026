@@ -63,10 +63,10 @@ flowchart LR
 
 In Lab 06, you learned `groupby()` — the split-apply-combine pattern:
 
-```python
+~~~python
 # Lab 06 — pandas groupby
 df.groupby('account_id')['amount'].sum()
-```
+~~~
 
 That single line does three things:
 
@@ -454,7 +454,7 @@ but they differ in how they handle the output:
 - **`flatMap`** produces **zero or more outputs per input**, then flattens
   them into a single list.
 
-```python
+~~~python
 # Suppose our RDD contains two lines:
 lines = ["alert login", "payment failed"]
 
@@ -467,7 +467,7 @@ lines.map(lambda line: line.split())
 lines.flatMap(lambda line: line.split())
 # Result: ["alert", "login", "payment", "failed"]
 #          ↑ flat — four individual words
-```
+~~~
 
 We need `flatMap` here because `split()` produces multiple words from one line,
 and we want all the words in a single flat sequence — not a list of lists.
@@ -680,24 +680,24 @@ not attempting the bonus, you can skip this section.
 
 In Lab 06, you created new columns and applied conditions like this:
 
-```python
+~~~python
 # Lab 06 — pandas: conditional column
 import numpy as np
 df['size'] = np.where(df['poblacion'] > 50000, 'Large', 'Small')
-```
+~~~
 
 In Spark, you cannot assign to a column with `=` because the DataFrame is
 distributed. Instead, you use `.withColumn()` to produce a new DataFrame with
 the column added:
 
-```python
+~~~python
 # Spark: conditional column with F.when().otherwise()
 df = df.withColumn(
     "size",
     F.when(F.col("poblacion") > 50000, "Large")
      .otherwise("Small")
 )
-```
+~~~
 
 | Spark Syntax | What It Does | pandas Equivalent |
 |---|---|---|
