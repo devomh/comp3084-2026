@@ -435,7 +435,7 @@ anomaly
 
 <details><summary>Scaffold hint</summary>
 
-```sql
+~~~sql
 WITH annual AS (
     SELECT municipio_id, SUM(consumo_kwh) AS total_kwh
     FROM consumo
@@ -447,7 +447,7 @@ FROM annual a
 INNER JOIN municipio m ON a.municipio_id = m.id
 ORDER BY kwh_per_cap DESC
 LIMIT 10;
-```
+~~~
 
 Note the `* 1.0` trick — it forces floating-point division in SQLite,
 which otherwise would do integer division on two integer columns.
