@@ -94,6 +94,12 @@ ORDER BY name;
 
 ### Exercise 1.2: Inspect Each Table's Columns
 
+`PRAGMA` is SQLite's introspection command — it is not portable SQL.
+`PRAGMA table_info('t')` returns one row per column with its name, type,
+nullability, default, and primary-key position. Other databases use
+`information_schema.columns` (Postgres, MySQL) or `DESCRIBE t` for the
+same purpose.
+
 ```python
 %sql PRAGMA table_info('region');
 ```
