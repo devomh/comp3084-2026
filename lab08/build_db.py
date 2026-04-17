@@ -1,9 +1,8 @@
 """Build the SQLite database for Lab 08 from the Lab 06 CSVs.
 
-Creates data/municipios.db with four tables:
+Creates data/municipios.db with three tables:
     region      (6 rows, hand-curated)
     municipio   (78 rows, from municipios_stats.csv)
-    demografia  (78 rows, from municipios_stats.csv)
     consumo     (937 rows: 936 monthly readings + 1 orphan)
 
 The orphan row (municipio_id=999) is inserted intentionally to give
@@ -53,12 +52,6 @@ CREATE TABLE municipio (
     area_km2    REAL    NOT NULL
 );
 
-CREATE TABLE demografia (
-    municipio_id      INTEGER PRIMARY KEY REFERENCES municipio(id),
-    ingreso_mediano   REAL    NOT NULL,
-    tasa_pobreza      REAL    NOT NULL
-);
-
 CREATE TABLE consumo (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     municipio_id    INTEGER NOT NULL,
@@ -88,7 +81,6 @@ def main():
 
     municipio_id_by_name = {}
     municipio_rows = []
-    demografia_rows = []
     with open(STATS_CSV, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for i, row in enumerate(reader, start=1):
@@ -99,19 +91,11 @@ def main():
                 i, nombre, region_id,
                 int(row["poblacion"]), float(row["area_km2"]),
             ))
-            demografia_rows.append((
-                i, float(row["ingreso_mediano"]), float(row["tasa_pobreza"]),
-            ))
 
     cur.executemany(
         "INSERT INTO municipio (id, nombre, region_id, poblacion, area_km2) "
         "VALUES (?, ?, ?, ?, ?)",
         municipio_rows,
-    )
-    cur.executemany(
-        "INSERT INTO demografia (municipio_id, ingreso_mediano, tasa_pobreza) "
-        "VALUES (?, ?, ?)",
-        demografia_rows,
     )
 
     consumo_rows = []
@@ -136,7 +120,6 @@ def main():
 
     n_region = cur.execute("SELECT COUNT(*) FROM region").fetchone()[0]
     n_municipio = cur.execute("SELECT COUNT(*) FROM municipio").fetchone()[0]
-    n_demografia = cur.execute("SELECT COUNT(*) FROM demografia").fetchone()[0]
     n_consumo = cur.execute("SELECT COUNT(*) FROM consumo").fetchone()[0]
 
     n_orphans = cur.execute(
@@ -152,7 +135,6 @@ def main():
     print(f"Wrote {DB_PATH.relative_to(LAB08_DIR)}")
     print(f"  region:     {n_region} rows")
     print(f"  municipio:  {n_municipio} rows")
-    print(f"  demografia: {n_demografia} rows")
     print(f"  consumo:    {n_consumo} rows ({n_consumo - 1} + 1 orphan)")
 
     if n_orphans != 1:

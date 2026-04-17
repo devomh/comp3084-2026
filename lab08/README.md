@@ -53,9 +53,10 @@ pip install jupysql pandas matplotlib
 
 **Library Constraints (strictly enforced):**
 
-- **`jupysql`** — Cell magics (`%sql`, `%%sql`, `%sqlplot`) and result capture
-- **`pandas`** — Only to receive query results inside the two inline plot helpers
-- **`matplotlib`** — Only inside the inline helper cell; not in any analysis cell
+- **`jupysql`** — Cell magics (`%sql`, `%%sql`) and result capture
+- **`pandas`** — Only to receive query results for the inline plot helpers
+- **`matplotlib`** — Allowed for the provided `bar`/`compare` helpers and
+  the Phase 3 histogram; analysis should still happen in SQL, not pandas
 - **No ORM** — no SQLAlchemy Core/ORM beyond the JupySQL connection string
 - **No `pd.read_sql`** — the SQL must be visible on the page via `%sql` / `%%sql`
 
@@ -63,8 +64,8 @@ pip install jupysql pandas matplotlib
 
 Located in the [`data/`](data/) directory:
 
-1. **`municipios.db`** — SQLite database with four tables (`region`,
-   `municipio`, `demografia`, `consumo`) derived from the Lab 06 CSVs
+1. **`municipios.db`** — SQLite database with three tables (`region`,
+   `municipio`, `consumo`) derived from the Lab 06 CSVs
 
 The database is committed to the repo so you do not need to run
 `build_db.py` to start the lab. If you do want to rebuild it:
@@ -101,11 +102,10 @@ You will:
 - Load JupySQL and connect to `sqlite:///data/municipios.db`
 - List all tables via `sqlite_master`
 - Inspect each table's columns with `PRAGMA table_info(...)`
-- Draw the schema (ASCII or Mermaid) in [`submission.md`](submission.md)
 
 **Key insight:** Before you query, you must know what is in the box.
 
-### Phase 2: Filtering and Ranking (25 min)
+### Phase 2: Filtering and Ranking (30 min)
 
 **Objective:** Re-answer Lab 06's filter questions in SQL.
 
@@ -113,27 +113,28 @@ You will:
 
 - Count municipalities with `WHERE poblacion > 50000`
 - Use a scalar subquery to filter by a named region
-- Match names with `LIKE '%ue%'`
+- Match names with `LIKE` (including a write-your-own `San%` prefix query)
 - Rank the top 10 municipalities by population and plot them
 
 **Key insight:** `SELECT ... WHERE ... ORDER BY ... LIMIT` is the same
 operation as `df[df['col'] > x].nlargest(n, 'col')` in pandas.
 
-### Phase 3: Aggregation (30 min)
+### Phase 3: Aggregation (40 min)
 
 **Objective:** Separate `WHERE` from `HAVING` and run multi-aggregate queries.
 
 You will:
 
 - Compute total population per region (first `JOIN` appears here)
-- Ask for `COUNT`, `AVG`, `MIN`, `MAX` in a single query
-- Use `HAVING` to filter *after* aggregation
-- Plot a population histogram with `%sqlplot histogram`
+- Write your own multi-aggregate query combining `COUNT`, `AVG`, `MIN`, `MAX`
+- Use `HAVING` to filter *after* aggregation, plus a write-your-own
+  `HAVING MAX(...) > 100000` query
+- Plot a population histogram
 
 **Key insight:** `WHERE` filters rows *before* grouping; `HAVING` filters
 groups *after* aggregating. The order is not cosmetic.
 
-### Phase 4: Joins (40 min)
+### Phase 4: Joins (45 min)
 
 **Objective:** Two-table and three-table joins; `INNER` vs `LEFT`.
 
@@ -147,7 +148,7 @@ You will:
 **Key insight:** `INNER JOIN` drops unmatched rows without warning.
 `LEFT JOIN` is how you *notice* what the inner join threw away.
 
-### Phase 5: Critical Incident — Re-finding Vieques (25 min)
+### Phase 5: Critical Incident — Re-finding Vieques (30 min)
 
 **Objective:** Use a CTE (`WITH`) to rank per-capita consumption and
 reproduce the Lab 06 anomaly.
@@ -181,7 +182,7 @@ without errors and that you can answer the following:
 **Before you leave:**
 
 - Complete all sections of [`submission.md`](submission.md), including
-  the schema drawing and the CTE query
+  the CTE query
 - Ensure all notebook cells run without errors from top to bottom
 - Include your AI Usage Appendix if applicable
 
@@ -198,7 +199,6 @@ without errors and that you can answer the following:
 
 Complete [`submission.md`](submission.md) with:
 
-- Schema drawing (ASCII or Mermaid)
 - Phase 2–4 query answers
 - The Phase 5 CTE query (copy-pasted) and its top-10 result
 - Answers to the three wrap-up reflection prompts
@@ -209,28 +209,22 @@ Complete [`submission.md`](submission.md) with:
 
 | Component | Points | Criteria |
 |-----------|--------|----------|
-| **Schema literacy (Phase 1)** | 10 | Tables and columns correctly inventoried; schema diagram present |
+| **Schema literacy (Phase 1)** | 10 | Tables correctly inventoried |
 | **Filtering & ranking (Phase 2)** | 15 | Correct `WHERE`, `LIKE`, `ORDER BY`, `LIMIT`; results match Lab 06 |
 | **Aggregation with HAVING (Phase 3)** | 20 | Correct `GROUP BY`; `HAVING` vs `WHERE` distinction explained |
-| **Two-table joins (Phase 4A–4B)** | 20 | `INNER JOIN` on 2 and 3 tables; results explained |
-| **LEFT JOIN & orphan reasoning (Phase 4C)** | 10 | Orphan row found; danger of `INNER JOIN` explained |
+| **Two-table joins (Ex 4.1–4.2)** | 20 | `INNER JOIN` on 2 and 3 tables; results explained |
+| **LEFT JOIN & orphan reasoning (Ex 4.3)** | 10 | Orphan row found; danger of `INNER JOIN` explained |
 | **Critical Incident CTE (Phase 5)** | 15 | Correct `WITH` clause; Vieques identified as top per-capita |
 | **Reflection — three dialects** | 10 | Pandas / PySpark / SQL comparison in your own words |
 | **Total** | **100** | |
-
-**Bonus:**
-
-| Component | Points | Criteria |
-|-----------|--------|----------|
-| Self-join on `consumo` for month-over-month change | +5 | Correct self-join with aliases; one insight stated |
 
 ---
 
 ## Tips for Success
 
-1. **Read the schema before you query.** Section 1 of `concepts.md` and
-   Phase 1 of the notebook exist for a reason. You cannot write a
-   `JOIN` without knowing the foreign key column name.
+1. **Read the schema before you query.** Phase 1 of the notebook exists
+   for a reason. You cannot write a `JOIN` without knowing the foreign
+   key column name.
 
 2. **The query is the artifact on the page.** Plots are unscored. If
    your SQL is right and your chart is ugly, you earn full marks. If
@@ -247,7 +241,8 @@ Complete [`submission.md`](submission.md) with:
 
 5. **Use `<<` to capture results.** The JupySQL `result << SELECT ...`
    syntax saves the output into a named variable you can convert to a
-   DataFrame (`result.DataFrame()`) or plot with `%sqlplot`.
+   DataFrame (`result.DataFrame()`) and pass to the `bar` / `compare`
+   helpers.
 
 ---
 
@@ -257,7 +252,7 @@ Complete [`submission.md`](submission.md) with:
   [JupySQL docs](https://jupysql.ploomber.io/en/latest/quick-start.html)
 - SQLite syntax reference:
   [SQLite SELECT](https://www.sqlite.org/lang_select.html)
-- SQL window of trust — the `WITH` clause:
+- Common Table Expressions — the `WITH` clause:
   [SQLite WITH](https://www.sqlite.org/lang_with.html)
 
 ## Questions?

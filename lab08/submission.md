@@ -6,19 +6,7 @@
 ## Section A: Schema (Phase 1)
 
 ### Tables present in `data/municipios.db`
-[List the four table names returned by the `sqlite_master` query]
-
-### Schema Diagram
-[Draw the four tables and the foreign-key relationships between them.
-ASCII art or a Mermaid diagram is fine. Show at minimum:
-- `municipio.region_id → region.id`
-- `demografia.municipio_id → municipio.id`
-- `consumo.municipio_id → municipio.id` (note: no FK enforced — this is
-  why the orphan row survives)]
-
-```
-[your diagram here]
-```
+[List the three table names returned by the `sqlite_master` query]
 
 ---
 
@@ -35,6 +23,12 @@ ASCII art or a Mermaid diagram is fine. Show at minimum:
 [Paste the result list]
 
 Anomaly municipality present: ______
+
+#### Your turn — municipalities starting with `San`
+```sql
+[your query here]
+```
+[Paste the result list]
 
 ### Exercise 2.4 — Top 10 by population
 | Rank | Municipio | Población |
@@ -64,6 +58,20 @@ Anomaly municipality present: ______
 | | |
 | | |
 
+### Exercise 3.2 — Multiple aggregates per region (your query)
+```sql
+[your query here]
+```
+
+| Region | n | avg_pop | min_pop | max_pop |
+|--------|---|---------|---------|---------|
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+
 ### Exercise 3.3 — `HAVING` vs `WHERE`
 Regions with average municipal population > 30,000:
 
@@ -79,9 +87,40 @@ Error message returned when the condition was placed in `WHERE`:
 Why `WHERE` cannot reference an aggregate (one sentence):
 [your answer]
 
+#### Your turn — regions whose maximum municipal population exceeds 100,000
+```sql
+[your query here]
+```
+
+| Region | max_pop |
+|--------|---------|
+| | |
+| | |
+
+Which clause carries the `MAX(...) > 100000` condition, and why?
+[your answer]
+
 ---
 
 ## Section D: Joins (Phase 4)
+
+### Exercise 4.1 — Top 10 July 2024 consumption (your query)
+```sql
+[your query here]
+```
+
+| Municipio | consumo_kwh |
+|-----------|-------------|
+| | |
+| | |
+| | |
+| | |
+| | |
+| | |
+| | |
+| | |
+| | |
+| | |
 
 ### Exercise 4.2 — Coastal vs Interior
 | `costa` | `total_kwh` |
@@ -95,9 +134,9 @@ Why is the interior total so much smaller than the coastal total?
 ### Exercise 4.3 — Orphan row
 Rows returned by the `LEFT JOIN ... WHERE m.id IS NULL` query:
 
-| `municipio_id` | `mes` | `consumo_kwh` |
-|----------------|-------|---------------|
-| | | |
+| `municipio_id` | `mes` | `consumo_kwh` | `m.nombre` |
+|----------------|-------|---------------|------------|
+| | | | |
 
 Number of rows `INNER JOIN` silently hid: ______
 
@@ -122,6 +161,11 @@ Number of rows `INNER JOIN` silently hid: ______
 | | | | |
 | | | | |
 | | | | |
+| | | | |
+| | | | |
+| | | | |
+| | | | |
+| | | | |
 
 Top row (expected: Vieques with kwh_per_cap ≈ 14.5): ______
 
@@ -139,7 +183,9 @@ Top row (expected: Vieques with kwh_per_cap ≈ 14.5): ______
    for first for each canonical question, and why?
    [your answer]
 
-2. Where did `HAVING` vs `WHERE` trip you up, if it did?
+2. Describe one moment where the `HAVING` vs `WHERE` distinction
+   mattered — either a mistake you caught or a query where the choice
+   of clause changed the answer.
    [your answer]
 
 3. What happened to the orphan row in your `INNER JOIN`?
@@ -147,14 +193,7 @@ Top row (expected: Vieques with kwh_per_cap ≈ 14.5): ______
 
 ---
 
-## Section G: Bonus (if attempted)
-
-### Self-Join: Month-over-Month Change
-[Paste the query and one insight it revealed]
-
----
-
-## Section H: AI Usage (if applicable)
+## Section G: AI Usage (if applicable)
 
 ### Tool Used
 [Name of AI tool]

@@ -45,6 +45,7 @@ Run these three cells first. Every later cell depends on them.
 %config SqlMagic.autopandas = False
 %config SqlMagic.feedback = False
 %config SqlMagic.displaycon = False
+%config SqlMagic.displaylimit = 30
 %sql sqlite:///data/municipios.db
 ```
 
@@ -90,7 +91,7 @@ WHERE type = 'table'
 ORDER BY name;
 ```
 
-**Task:** Record the four table names in [`submission.md`](submission.md).
+**Task:** Record the three table names in [`submission.md`](submission.md).
 
 ### Exercise 1.2: Inspect Each Table's Columns
 
@@ -109,16 +110,8 @@ same purpose.
 ```
 
 ```python
-%sql PRAGMA table_info('demografia');
-```
-
-```python
 %sql PRAGMA table_info('consumo');
 ```
-
-**Task:** In [`submission.md`](submission.md), draw the schema (ASCII art
-or Mermaid) showing all four tables and the foreign-key relationships
-between them.
 
 ### Exercise 1.3: Three Warm-Up `SELECT`s
 
@@ -198,6 +191,17 @@ ORDER BY nombre;
 
 **Task:** Which well-known anomaly municipality appears in this list?
 
+**Your turn.** Write a second query in a new cell that finds every
+municipality whose name **starts with** `San`. Paste both the query and
+its result into [`submission.md`](submission.md).
+
+<details><summary>Hint</summary>
+
+The `%` wildcard goes *after* the literal prefix: `LIKE 'San%'`. Expect
+several rows — San Juan, San Sebastián, San Germán, and others.
+
+</details>
+
 ### Exercise 2.4: Top 10 by Population
 
 ```python
@@ -230,7 +234,7 @@ This is your first join: `municipio` to `region`.
 %%sql region_pop <<
 SELECT r.nombre AS region, SUM(m.poblacion) AS total
 FROM municipio m
-JOIN region r ON m.region_id = r.id
+INNER JOIN region r ON m.region_id = r.id
 GROUP BY r.nombre
 ORDER BY total DESC;
 ```
@@ -246,18 +250,24 @@ bar(region_pop.DataFrame(), 'region', 'total',
 
 ### Exercise 3.2: Multiple Aggregates at Once
 
-```python
-%%sql
-SELECT r.nombre AS region,
-       COUNT(*)        AS n,
-       AVG(m.poblacion) AS avg_pop,
-       MIN(m.poblacion) AS min_pop,
-       MAX(m.poblacion) AS max_pop
-FROM municipio m
-JOIN region r ON m.region_id = r.id
-GROUP BY r.nombre
-ORDER BY avg_pop DESC;
-```
+**Your turn.** Write a single query that returns, for each region:
+
+- the region name,
+- the count of municipalities in that region,
+- the average, minimum, and maximum municipal population.
+
+Order the result by average population descending. Adapt the JOIN
+pattern from Ex 3.1.
+
+<details><summary>Shape of the expected result</summary>
+
+Six rows (one per region), five columns: `region`, `n`, `avg_pop`,
+`min_pop`, `max_pop`. The region with the highest `avg_pop` should
+appear first.
+
+</details>
+
+Paste the query and its result into [`submission.md`](submission.md).
 
 ### Exercise 3.3: `HAVING` vs `WHERE`
 
@@ -267,7 +277,7 @@ Find regions whose *average* municipal population exceeds 30,000.
 %%sql
 SELECT r.nombre AS region, AVG(m.poblacion) AS avg_pop
 FROM municipio m
-JOIN region r ON m.region_id = r.id
+INNER JOIN region r ON m.region_id = r.id
 GROUP BY r.nombre
 HAVING AVG(m.poblacion) > 30000
 ORDER BY avg_pop DESC;
@@ -280,13 +290,27 @@ because it raises an error on purpose:
     -- Intentionally wrong: an aggregate inside WHERE.
     SELECT r.nombre AS region, AVG(m.poblacion) AS avg_pop
     FROM municipio m
-    JOIN region r ON m.region_id = r.id
+    INNER JOIN region r ON m.region_id = r.id
     WHERE AVG(m.poblacion) > 30000
     GROUP BY r.nombre;
 
 **Task:** Run the wrong query in your own scratch cell, copy the error
 message into [`submission.md`](submission.md), and explain in one
 sentence why `WHERE` cannot reference an aggregate.
+
+**Your turn.** Write a query that returns regions whose **maximum**
+municipal population exceeds 100,000. Which clause carries the
+`MAX(m.poblacion) > 100000` condition?
+
+<details><summary>Shape of the expected result</summary>
+
+Two columns: `region`, `max_pop`. Only regions with at least one
+municipality above 100k should appear. The `MAX(...)` condition belongs
+in `HAVING` because it is an aggregate.
+
+</details>
+
+Paste the query and its result into [`submission.md`](submission.md).
 
 ### Exercise 3.4: Histogram of Municipal Populations
 
@@ -321,6 +345,20 @@ ORDER BY c.mes, m.nombre
 LIMIT 20;
 ```
 
+**Your turn.** Write a 2-table join that returns, **for July 2024
+only**, each municipality's name and its `consumo_kwh`. Order by
+`consumo_kwh` descending and limit to the top 10.
+
+<details><summary>Shape of the expected result</summary>
+
+Two columns: `nombre`, `consumo_kwh`. Exactly 10 rows. All rows have
+`mes = '2024-07'`. The filter on `mes` goes in a `WHERE` clause — it
+applies to individual rows, not to aggregates.
+
+</details>
+
+Paste the query and its result into [`submission.md`](submission.md).
+
 ### Exercise 4.2: Three-Table INNER JOIN — Coastal vs Interior
 
 Annual consumption split by coastal (`costa = 1`) vs interior
@@ -330,8 +368,8 @@ Annual consumption split by coastal (`costa = 1`) vs interior
 %%sql coast_v_interior <<
 SELECT r.costa, SUM(c.consumo_kwh) AS total_kwh
 FROM consumo c
-JOIN municipio m ON c.municipio_id = m.id
-JOIN region r   ON m.region_id    = r.id
+INNER JOIN municipio m ON c.municipio_id = m.id
+INNER JOIN region r    ON m.region_id    = r.id
 GROUP BY r.costa;
 ```
 
@@ -345,13 +383,15 @@ compare(coast_v_interior.DataFrame(), 'costa', 'total_kwh', group='costa',
 ```
 
 **Task:** Why is the interior total so much smaller than the coastal
-total? (Hint: re-read `concepts.md` and think about how many regions
-are coastal vs interior.)
+total? (Hint: look back at the `region` table and count how many regions
+have `costa = 1` vs `costa = 0`.)
 
 ### Exercise 4.3: LEFT JOIN — Finding the Orphan
 
-The inner join in Ex 4.1 quietly dropped some rows. Let's see which
-ones by using a `LEFT JOIN` and filtering for the unmatched side.
+The `INNER JOIN` pattern from Ex 4.1 quietly drops any `consumo` row
+whose `municipio_id` has no match in `municipio` — the `LIMIT 20` hid
+this from you. Let's see which rows are missing by using a `LEFT JOIN`
+and filtering for the unmatched side.
 
 ```python
 %%sql
@@ -373,25 +413,54 @@ One CTE + aggregation + ranking, reproducing the Lab 06 anomaly.
 
 ### Exercise 5.1: The CTE Query
 
+**Your turn.** Write the query yourself. Capture its result into a
+variable named `anomaly` using the `<<` operator.
+
+Required shape:
+
+- A CTE named `annual` that sums `consumo_kwh` per `municipio_id` from
+  the `consumo` table.
+- An outer query that joins `annual` to `municipio`, projects `nombre`,
+  `total_kwh`, `poblacion`, and a rounded `kwh_per_cap` column, orders
+  descending by `kwh_per_cap`, and limits to 10 rows.
+
 ```python
 %%sql anomaly <<
-WITH annual AS (
-    SELECT municipio_id, SUM(consumo_kwh) AS total_kwh
-    FROM consumo
-    WHERE municipio_id IN (SELECT id FROM municipio)
-    GROUP BY municipio_id
-)
-SELECT m.nombre, a.total_kwh, m.poblacion,
-       ROUND(a.total_kwh * 1.0 / m.poblacion, 2) AS kwh_per_cap
-FROM annual a
-JOIN municipio m ON a.municipio_id = m.id
-ORDER BY kwh_per_cap DESC
-LIMIT 10;
+-- your CTE query here
 ```
 
 ```python
 anomaly
 ```
+
+<details><summary>Scaffold hint</summary>
+
+```sql
+WITH annual AS (
+    SELECT municipio_id, SUM(consumo_kwh) AS total_kwh
+    FROM consumo
+    GROUP BY municipio_id
+)
+SELECT m.nombre, a.total_kwh, m.poblacion,
+       ROUND(a.total_kwh * 1.0 / m.poblacion, 2) AS kwh_per_cap
+FROM annual a
+INNER JOIN municipio m ON a.municipio_id = m.id
+ORDER BY kwh_per_cap DESC
+LIMIT 10;
+```
+
+Note the `* 1.0` trick — it forces floating-point division in SQLite,
+which otherwise would do integer division on two integer columns.
+
+</details>
+
+<details><summary>Shape of the expected result</summary>
+
+10 rows, 4 columns: `nombre`, `total_kwh`, `poblacion`, `kwh_per_cap`.
+Vieques should appear at or near the top with `kwh_per_cap` ≈ 14.5 —
+roughly an order of magnitude above the next municipality.
+
+</details>
 
 ### Exercise 5.2: Visualize with Vieques Highlighted
 
@@ -406,33 +475,6 @@ write one sentence on:
 - Why Vieques stands out (you already know this from Lab 06)
 - Why the CTE form (`WITH annual AS ...`) is cleaner than writing the
   subquery inline
-
----
-
-## Phase 6: Optional Bonus
-
-### Bonus: Month-over-Month Change via Self-Join
-
-Join `consumo` to itself to compute the consumption delta between
-consecutive months for each municipality.
-
-```python
-%%sql
-SELECT m.nombre,
-       c1.mes AS mes_actual,
-       c1.consumo_kwh AS actual,
-       c2.consumo_kwh AS anterior,
-       ROUND(c1.consumo_kwh - c2.consumo_kwh, 1) AS delta
-FROM consumo c1
-JOIN consumo c2 ON c1.municipio_id = c2.municipio_id
-              AND c1.mes = '2024-07' AND c2.mes = '2024-06'
-JOIN municipio m ON c1.municipio_id = m.id
-ORDER BY delta DESC
-LIMIT 10;
-```
-
-**Task:** What single insight does the self-join reveal? Record it in
-[`submission.md`](submission.md).
 
 ---
 
@@ -452,7 +494,6 @@ Before submitting:
 
 - [ ] All analysis cells were run and interpreted
 - [ ] Notebook runs from top to bottom without errors
-- [ ] Schema diagram drawn in [`submission.md`](submission.md)
 - [ ] The Phase 5 CTE query and its result are in the submission
 - [ ] Reflection prompts answered
 
@@ -460,5 +501,7 @@ Before submitting:
 
 1. Which of the three tools (pandas / PySpark / SQL) would you reach
    for first for each canonical question, and why?
-2. Where did `HAVING` vs `WHERE` trip you up, if it did?
+2. Describe one moment where the `HAVING` vs `WHERE` distinction
+   mattered — either a mistake you caught or a query where the choice
+   of clause changed the answer.
 3. What happened to the orphan row in your `INNER JOIN`?
