@@ -21,14 +21,17 @@ Run these cells first. They install JupySQL, connect to an **in-memory**
 SQLite database, and create the two toy tables.
 
 ```python
-!pip install -q jupysql pandas matplotlib
+!pip install -q jupysql pandas matplotlib mermaid-py
 ```
 
 ```python
+from mermaid import Mermaid
+
 %load_ext sql
 %config SqlMagic.autopandas = False
 %config SqlMagic.feedback = False
 %config SqlMagic.displaycon = False
+%config SqlMagic.displaylimit = 30
 %sql sqlite://
 ```
 
@@ -39,6 +42,9 @@ written to disk, and when the kernel restarts the tables are gone.
 
 ```python
 %%sql
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS grades;
+
 CREATE TABLE students (
     id   INTEGER PRIMARY KEY,
     name TEXT    NOT NULL,
@@ -53,10 +59,7 @@ INSERT INTO students (id, name, gpa, dob) VALUES
     (4, 'Diego Ruiz',    2.75, '2005-03-09'),
     (5, 'Elena Vargas',  3.50, '2003-12-30'),
     (6, 'Félix Otero',   NULL, '2006-01-18');
-```
 
-```python
-%%sql
 CREATE TABLE grades (
     student_id INTEGER,
     exam       TEXT,
@@ -153,17 +156,6 @@ flowchart LR
 """)
 ```
 
-Run the setup cell if you want the Mermaid diagrams rendered inside the
-notebook:
-
-```python
-!pip install -q mermaid-py
-```
-
-```python
-from mermaid import Mermaid
-```
-
 ---
 
 ## 1. `SELECT ... FROM ...` — Projection
@@ -242,6 +234,7 @@ FROM students
 WHERE gpa IS NULL;
 ```
 
+<!-- #region -->
 > **Practice 1.** Write a query that returns the `name` and `gpa` of every
 > student whose GPA is **at least 3.0**. How many rows do you get, and why
 > is Félix *not* in the result?
@@ -257,6 +250,8 @@ WHERE gpa IS NULL;
 > only keeps rows where the predicate evaluates to true.
 >
 > </details>
+
+<!-- #endregion -->
 
 ---
 
@@ -311,6 +306,8 @@ compares each student's GPA against it. Without a scalar subquery, you
 would have to compute the average in Python first and then paste a literal
 number into the SQL — brittle and non-portable.
 
+<!-- #region -->
+
 > **Practice 2.** Write a query that returns every student whose GPA is
 > **below** the class average. Hint: the inner subquery does not change.
 >
@@ -326,6 +323,8 @@ number into the SQL — brittle and non-portable.
 > Practice 1).
 >
 > </details>
+
+<!-- #endregion -->
 
 ---
 
@@ -396,18 +395,20 @@ Both queries look similar, but they answer **different questions**:
 
 ### Why you cannot put an aggregate in `WHERE`
 
-```sql
+~~~sql
 -- Intentionally wrong:
 SELECT student_id, AVG(score)
 FROM grades
 WHERE AVG(score) > 80          -- error: aggregate in WHERE
 GROUP BY student_id;
-```
+~~~
 
 `WHERE` runs once per input row, before grouping has happened — so
 `AVG(score)` is not yet defined. SQLite raises
 `misuse of aggregate function AVG()`. Move the condition to `HAVING`
 (which runs after aggregation) to fix it.
+
+<!-- #region -->
 
 > **Practice 3.** Write a query that returns the **student_id and average
 > score** of students whose **worst exam** was still above 70. Which
@@ -428,6 +429,8 @@ GROUP BY student_id;
 > *after* the group is formed. Two students qualify: Ana and Carla.
 >
 > </details>
+
+<!-- #endregion -->
 
 ---
 
@@ -530,6 +533,8 @@ WHERE s.id IS NULL;
 This is the standard **integrity probe**. When you suspect foreign-key
 rot, run it before trusting any `INNER JOIN`.
 
+<!-- #region -->
+
 > **Practice 4.** Write a query that returns the `name` of every student
 > who has **no grades at all**. Hint: `LEFT JOIN` from `students` to
 > `grades`, then filter for the unmatched side.
@@ -548,6 +553,8 @@ rot, run it before trusting any `INNER JOIN`.
 > keeps only the students whose right side came back empty.
 >
 > </details>
+
+<!-- #endregion -->
 
 ### When `INNER JOIN` Lies
 
@@ -605,6 +612,8 @@ flowchart LR
 Without the CTE, you would either nest the subquery inline (unreadable
 once the query grows) or rank raw fact rows before aggregating (wrong).
 
+<!-- #region -->
+
 > **Practice 5.** Rewrite the CTE query above so that instead of the top
 > 3 students, it returns **students whose average score is above the
 > overall class average score**. You will need *two* aggregates: one in
@@ -631,6 +640,8 @@ once the query grows) or rank raw fact rows before aggregating (wrong).
 > against it.
 >
 > </details>
+
+<!-- #endregion -->
 
 ---
 
