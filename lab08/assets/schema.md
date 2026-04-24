@@ -7,6 +7,7 @@ Exercise 4.3 can find it.
 
 ```mermaid
 erDiagram
+    direction LR
     region {
         INTEGER id PK
         TEXT    nombre "UNIQUE NOT NULL"
