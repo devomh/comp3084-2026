@@ -2,13 +2,9 @@
 
 **Field Manual**: [concepts.md](https://github.com/devomh/comp3084-2026/blob/main/lab09/concepts.md)
 
-**Lab Guide**: [lab09.md](https://github.com/devomh/comp3084-2026/blob/main/lab09/lab09.md)
+**Lab09**: [![Open Lab Notebook In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/devomh/comp3084-2026/blob/main/lab09/lab09.ipynb)
 
 **Live App**: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/devomh/comp3084-2026/main/lab09/app.py)
-
-> **Note:** This lab does not use a Colab notebook. You write `app.py`
-> incrementally in Colab using `%%writefile` and view it via a localtunnel
-> bridge. The final app is deployed to Streamlit Community Cloud.
 
 ## Case Brief
 
