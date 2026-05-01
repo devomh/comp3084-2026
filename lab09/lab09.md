@@ -15,7 +15,7 @@ URL in a browser.
 
 Your mission has five parts:
 
-1. **Run** a Streamlit app in Colab and understand the re-run model
+1. **Run** a Streamlit app locally and understand the re-run model
 2. **Connect** the app to `municipios.db` with cached resources and
    parameterized queries
 3. **Wire** sidebar widgets to those queries so every filter change
@@ -35,45 +35,27 @@ deployment.
 
 ## Setup
 
-Run these cells once at the start of the lab, in order. Do not skip any.
+Run this command once from the `lab09/` directory before starting the
+exercises:
 
-```python
-# Cell 1 — Clone the course repository
-!git clone https://github.com/devomh/comp3084-2026.git
+```bash
+pip install -r requirements.txt
 ```
 
-```python
-# Cell 2 — Move into the lab directory (all later paths are relative here)
-import os
-os.chdir("comp3084-2026/lab09")
-```
-
-```python
-# Cell 3 — Install Streamlit
-!pip install -q streamlit
-```
-
-```python
-# Cell 4 — Get the localtunnel password (copy the IP address printed here)
-!wget -q -O - ipv4.icanhazip.com
-```
-
-After Cell 4, keep the printed IP address handy — you will paste it into
-the localtunnel "Endpoint IP" box every time you view the app.
+`data/municipios.db` is already present in the repository — no additional
+download is needed.
 
 ---
 
 ## Phase 1: Hello, Dashboard
 
-**Goal:** Run a Streamlit app in Colab via localtunnel; understand the
-re-run model.
+**Goal:** Run a Streamlit app locally; understand the re-run model.
 
 ### Exercise 1.1: The Minimal App
 
-Create `app.py` with the `%%writefile` magic and launch it:
+Create `app.py` in the `lab09/` directory with the following content:
 
 ```python
-%%writefile app.py
 import streamlit as st
 
 st.set_page_config(page_title="Municipal Intelligence Dashboard", layout="wide")
@@ -81,28 +63,19 @@ st.title("Municipal Intelligence Dashboard")
 st.write("Dashboard is running.")
 ```
 
-```python
-# Cell 5 — Launch (keep this cell running for the duration of the lab)
-!streamlit run app.py & sleep 3 && npx localtunnel --port 8501
+Launch it from your terminal:
+
+```bash
+streamlit run app.py
 ```
 
-When Cell 5 prints `your url is: https://some-words.loca.lt`:
-
-1. Click the link.
-2. On the "Friendly Reminder" page, paste the IP from Cell 4 into the
-   **Endpoint IP** box and click Submit.
-3. The dashboard appears.
-
-**Record the IP address in [`submission.md`](submission.md)** — you will
-need it again if Cell 5 is restarted.
+Open `http://localhost:8501` in your browser. The dashboard appears.
 
 ### Exercise 1.2: The Re-Run Model
 
-Update the `%%writefile` cell and restart the tunnel to observe the
-re-run model:
+Replace the contents of `app.py` with:
 
 ```python
-%%writefile app.py
 import streamlit as st
 
 st.set_page_config(page_title="Municipal Intelligence Dashboard", layout="wide")
@@ -112,8 +85,8 @@ n = st.sidebar.slider("Top N municipalities", 5, 20, 10)
 st.write(f"You selected: {n}")
 ```
 
-Stop Cell 5 (click the stop button) and re-run it. A new `loca.lt` URL
-will appear. Open it and move the slider.
+Save the file. Streamlit detects the change — click **Rerun** in the
+browser banner (or press `R`). Then move the slider.
 
 The value updates without pressing any button. **This is the re-run
 model:** every widget interaction re-executes `app.py` from the first
@@ -123,11 +96,9 @@ before line 7.
 
 ### Exercise 1.3: The Empty-State Constraint
 
-Add a text input and observe what the app renders before the user types
-anything:
+Replace the contents of `app.py` with:
 
 ```python
-%%writefile app.py
 import streamlit as st
 
 st.set_page_config(page_title="Municipal Intelligence Dashboard", layout="wide")
@@ -140,13 +111,13 @@ st.write(f"Slider value: {n}")
 st.write(f"Search term: '{search}'")
 ```
 
-Restart the tunnel and observe: when `search` is empty (the initial
-state), the app still renders — it does not crash. The app must handle
-every valid state a widget can be in, including the initial empty state.
-This is a design constraint you will apply in Phase 3.
+Save and rerun. Observe: when `search` is empty (the initial state), the
+app still renders — it does not crash. The app must handle every valid
+state a widget can be in, including the initial empty state. This is a
+design constraint you will apply in Phase 3.
 
-**Deliverable:** A running `app.py` via localtunnel that responds to two
-widgets. No database yet.
+**Deliverable:** A running `app.py` at `http://localhost:8501` that
+responds to two widgets. No database yet.
 
 ---
 
@@ -162,7 +133,6 @@ session**, not once per re-run. Without it, a new SQLite connection would
 open on every slider move.
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -181,7 +151,7 @@ st.title("Municipal Intelligence Dashboard")
 st.write(f"Database tables: {pd.read_sql('SELECT name FROM sqlite_master WHERE type=?', con, params=['table'])['name'].tolist()}")
 ```
 
-Restart the tunnel. The `st.write` line should print
+Save and rerun. The `st.write` line should print
 `['region', 'municipio', 'demografia', 'consumo']`.
 
 ### Exercise 2.2: Load Static Reference Data
@@ -191,7 +161,6 @@ for `@st.cache_data`. The leading underscore on `_con` tells Streamlit
 not to try to hash the connection object.
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -225,7 +194,6 @@ list; `params=selected` passes that list safely to the database driver —
 no f-string interpolation of user values.
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -269,7 +237,7 @@ df = pd.read_sql(
 st.dataframe(df)
 ```
 
-Restart the tunnel. Deselect one region — the table updates immediately.
+Save and rerun. Deselect one region — the table updates immediately.
 
 ### Exercise 2.4: The `st.stop()` Guard
 
@@ -292,7 +260,6 @@ should now see a yellow warning box, not a stack trace.
 **Checkpoint — `app.py` at the end of Phase 2:**
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -377,7 +344,26 @@ Note: `selected + [top_n]` is just Python list concatenation. The
 `placeholders` string still covers only the `selected` values; `[top_n]`
 adds one more `?` for the `LIMIT` clause.
 
-### Exercise 3.3: The Text Search Query
+### Exercise 3.3: The Region Aggregate Query
+
+This query feeds the region bar chart you will build in Phase 4. Add it
+after `df_top`, still inside the `# --- Queries ---` block:
+
+```python
+df_region = pd.read_sql(
+    f"SELECT r.nombre AS region, SUM(m.poblacion) AS total_pop "
+    f"FROM municipio m JOIN region r ON m.region_id = r.id "
+    f"WHERE r.nombre IN ({placeholders}) "
+    f"GROUP BY r.nombre ORDER BY total_pop DESC",
+    con, params=selected
+)
+```
+
+Like `df_top`, it uses `placeholders` and `selected` so it automatically
+filters to the selected regions. You will not render it yet — it sits in
+the queries block and waits for Phase 4.
+
+### Exercise 3.4: The Text Search Query
 
 Add this **at the bottom of `app.py`**, after the raw data section you
 will build shortly. The `LIKE ?` pattern is the SQL equivalent of
@@ -400,9 +386,11 @@ if search:
 
 The conditional `if search:` means the section only renders when the
 user has typed something — matching the empty-state constraint from
-Exercise 1.3.
+Exercise 1.3. Notice that this query does **not** apply the region
+filter: the search is intentionally global so a planner can find any
+municipality by name regardless of region.
 
-### Exercise 3.4: The KPI Row
+### Exercise 3.5: The KPI Row
 
 `st.columns(3)` splits the main area into three equal columns. Each
 column receives its own `st.metric` call.
@@ -417,13 +405,13 @@ col3.metric(
 )
 ```
 
-Place this **after the guard and after all three queries are fetched**,
-and **before any headers or plots**.
+Place this **after all three DataFrames are defined** (`df` from Phase 2,
+`df_top` from Exercise 3.2, `df_region` from Exercise 3.3), and
+**before any headers or plots**.
 
 **Checkpoint — `app.py` at the end of Phase 3:**
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -533,11 +521,11 @@ use `plt.show()` — it has no effect in Streamlit.
 
 ### Exercise 4.1: Top N by Population (Horizontal Bar)
 
-Insert this block **between the KPI row and the Raw Data section**:
+First, add `import matplotlib.pyplot as plt` at the top of `app.py`
+alongside the other imports. Then insert the plot block **between the
+KPI row and the Raw Data section**:
 
 ```python
-import matplotlib.pyplot as plt
-
 st.header(f"Top {top_n} Municipalities by Population")
 fig, ax = plt.subplots(figsize=(10, 4))
 ax.barh(df_top["nombre"][::-1], df_top["poblacion"][::-1], color="steelblue")
@@ -573,10 +561,10 @@ restricts which regions appear.
 
 ### Exercise 4.3: Observation
 
-Move the region multiselect. Observe that **both charts update
-simultaneously** — not because they are linked, but because the entire
-script re-ran and both plot blocks executed again with the new `selected`
-value.
+Change the region selection in the sidebar. Observe that **both charts
+update simultaneously** — not because they are linked, but because the
+entire script re-ran and both plot blocks executed again with the new
+`selected` value.
 
 Answer in [`submission.md`](submission.md): What triggers the re-render?
 Which Python objects are recreated on each widget change?
@@ -584,7 +572,6 @@ Which Python objects are recreated on each widget change?
 **Final `app.py` — the submitted file:**
 
 ```python
-%%writefile app.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -709,29 +696,14 @@ change; `plt.close(fig)` present after each `st.pyplot`.
 
 ## Phase 5: Permanent Deployment
 
-**Goal:** Produce a `*.streamlit.app` URL that persists after the Colab
-session ends.
+**Goal:** Produce a `*.streamlit.app` URL that persists beyond your local
+machine.
 
-The localtunnel URL from Phases 1–4 disappears when Cell 5 is stopped.
-The Regional Planning Council cannot bookmark a URL that vanishes. This
-phase fixes that.
+The app running on `localhost:8501` is only accessible on your computer.
+The Regional Planning Council cannot bookmark a URL that only works on
+your machine. This phase fixes that.
 
-### Exercise 5.1: Download `app.py`
-
-In Colab's file browser (left panel → folder icon), navigate to
-`comp3084-2026/lab09/` and right-click `app.py` → **Download**.
-
-Verify the downloaded file matches the Phase 4 final checkpoint above.
-
-### Exercise 5.2: Verify No Absolute Paths
-
-Open the downloaded `app.py` in any text editor. Search for `/content`.
-If you find it, replace it with the relative path `data/municipios.db`.
-
-This is the most common cloud deployment failure. Streamlit Cloud does not
-have a `/content/` directory.
-
-### Exercise 5.3: Confirm `requirements.txt`
+### Exercise 5.1: Confirm `requirements.txt`
 
 The [`requirements.txt`](requirements.txt) committed to this repo
 already contains:
@@ -744,7 +716,7 @@ matplotlib
 
 `sqlite3` is Python's standard library — do not add it here.
 
-### Exercise 5.4: Confirm the Repository Structure
+### Exercise 5.2: Confirm the Repository Structure
 
 Before pushing, verify the following files exist in the `lab09/` directory
 of the course repo (or your own fork):
@@ -758,9 +730,11 @@ lab09/
 ```
 
 `municipios.db` must be committed. Streamlit Cloud clones the repo and
-does not run any build script.
+does not run any build script. Verify there are no absolute paths in
+`app.py` — the database path must be the relative `data/municipios.db`,
+not an absolute system path.
 
-### Exercise 5.5: Deploy on Streamlit Community Cloud
+### Exercise 5.3: Deploy on Streamlit Community Cloud
 
 1. Log in at **streamlit.io/cloud** with your GitHub account.
 2. Click **New app**.
@@ -771,10 +745,10 @@ does not run any build script.
 6. Once the build finishes, copy the `*.streamlit.app` URL.
 7. Paste the URL into [`submission.md`](submission.md).
 
-### Exercise 5.6: Smoke Test
+### Exercise 5.4: Smoke Test
 
 Open the `*.streamlit.app` URL in a **private/incognito browser tab**
-(no GitHub login, no IP password):
+(no GitHub login):
 
 - [ ] Page loads without error
 - [ ] Both charts render with all six regions selected (the default)
@@ -787,7 +761,7 @@ Open the `*.streamlit.app` URL in a **private/incognito browser tab**
 Document the smoke test results in [`submission.md`](submission.md).
 
 **Deliverable:** A permanent `*.streamlit.app` URL that the instructor
-can visit without any local setup or IP password.
+can visit without any local setup.
 
 ---
 
@@ -795,7 +769,7 @@ can visit without any local setup or IP password.
 
 You have now:
 
-1. Run a Streamlit app in Colab via localtunnel
+1. Run a Streamlit app locally and understood the re-run model
 2. Connected it to a SQLite database with cached resources
 3. Wired three sidebar widgets to parameterized SQL queries
 4. Built a KPI row and two matplotlib charts that re-render on every

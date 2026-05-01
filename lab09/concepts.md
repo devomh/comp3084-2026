@@ -12,17 +12,15 @@ with a small, self-contained example. When you are done here, open
 
 ## Setup (concepts examples only)
 
-The examples in this document can be run as a Streamlit app. Write them
-to a file and run via localtunnel:
+The examples in this document can be run as a Streamlit app. Save any
+example to a file and launch it locally:
 
-```python
-%%writefile toy.py
-# paste any example here
+```bash
+# save the example, then:
+streamlit run toy.py
 ```
 
-```python
-!streamlit run toy.py & sleep 3 && npx localtunnel --port 8501
-```
+Open `http://localhost:8501` in your browser.
 
 ---
 
@@ -40,7 +38,6 @@ triggers a complete re-execution.
 ### Why this matters
 
 ```python
-%%writefile toy.py
 import streamlit as st
 
 st.title("Re-run counter")
@@ -61,7 +58,6 @@ order of your UI**. A widget defined on line 10 returns its value to line
 it. You cannot reorder the rendered output without reordering the code.
 
 ```python
-%%writefile toy.py
 import streamlit as st
 
 # This slider appears in the sidebar
@@ -165,7 +161,6 @@ selected (list)     df (DataFrame)          in main area
 ### Concrete example
 
 ```python
-%%writefile toy.py
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -302,44 +297,28 @@ Streamlit equivalent.
 
 ---
 
-## 7. Colab + localtunnel
+## 7. Local vs Cloud
 
-Colab runs on a Google cloud server. The Streamlit process listens on
-port 8501 of **that server**, not on your own machine. You cannot open
-`localhost:8501` in your browser because there is nothing running on your
-`localhost`.
+During development you run `streamlit run app.py` on your own machine.
+The Streamlit server listens on port 8501 of **your machine**, so
+`http://localhost:8501` works in your browser. The moment you close the
+terminal the server stops and the URL is gone.
 
-**localtunnel** creates a temporary proxy: it opens a public URL
-(`*.loca.lt`) and forwards traffic from that URL to the Colab server's
-port 8501.
-
-```
-Your browser → https://xyz.loca.lt → (localtunnel proxy) → Colab :8501
-```
-
-### The IP password
-
-localtunnel displays a "Friendly Reminder" page to prevent phishing. It
-asks for the "Endpoint IP" — the public IP of the Colab server. You get
-this from:
-
-```python
-!wget -q -O - ipv4.icanhazip.com
-```
-
-Copy the printed IP address (e.g. `34.125.x.x`), paste it into the
-Endpoint IP box, and click Submit. The dashboard appears.
+Streamlit Community Cloud is different. It clones your GitHub repository,
+installs `requirements.txt`, and keeps the server running 24/7 at a
+permanent public URL (`*.streamlit.app`). Anyone with the link can open
+it — no local Python needed, no terminal to keep open.
 
 ### Ephemeral vs permanent
 
-| Attribute | localtunnel (`loca.lt`) | Streamlit Cloud (`streamlit.app`) |
+| Attribute | Local (`localhost:8501`) | Streamlit Cloud (`streamlit.app`) |
 |---|---|---|
-| Lifetime | Until you stop cell 5 | Persistent |
-| Requires IP password | Yes | No |
+| Lifetime | Until you close the terminal | Persistent |
+| Accessible to others | No — your machine only | Yes — public URL |
 | Requires GitHub | No | Yes (public repo) |
-| Purpose | In-session development | Production / submission |
+| Purpose | Development and iteration | Production / submission |
 
-Use localtunnel during the lab. Use Streamlit Cloud for submission.
+Use `localhost` during the lab. Use Streamlit Cloud for submission.
 
 ---
 
@@ -373,18 +352,19 @@ must not appear here.
 
 ### The absolute-path trap
 
-Colab's working directory is `/content/`. If you write:
+If your connection string uses an absolute path tied to your local
+machine:
 
 ```python
-# This works in Colab but breaks on Cloud
-sqlite3.connect("/content/comp3084-2026/lab09/data/municipios.db")
+# Breaks on Cloud — absolute path only exists on your machine
+sqlite3.connect("/home/yourname/lab09/data/municipios.db")
 ```
 
-Streamlit Cloud will fail with `FileNotFoundError` because the path
-`/content/...` does not exist on the Cloud server. Use a relative path:
+Streamlit Cloud will fail with `FileNotFoundError` because that path
+does not exist on the Cloud server. Use a relative path instead:
 
 ```python
-# Correct — works in both Colab and Cloud
+# Correct — works locally and on Cloud
 sqlite3.connect("data/municipios.db")
 ```
 
@@ -404,9 +384,9 @@ is in the same directory as `app.py`.
 | `st.stop()` | Halts execution; use to guard against invalid widget states |
 | `params=` | Pass widget values as SQL parameters, never via f-string |
 | `plt.close(fig)` | Release figure after `st.pyplot`; prevents memory warnings |
-| `loca.lt` URL | Ephemeral; tied to the running Colab session |
+| `localhost:8501` | Ephemeral; gone when you close the terminal |
 | `streamlit.app` URL | Permanent; deployed from a public GitHub repo |
-| Relative path | Use `"data/municipios.db"`, not `/content/...` |
+| Relative path | Use `"data/municipios.db"`, not an absolute system path |
 
 ### Streamlit API used in this lab
 
@@ -417,6 +397,8 @@ is in the same directory as `app.py`.
 | `st.header(text)` | Section heading |
 | `st.subheader(text)` | Sub-section heading |
 | `st.markdown(text)` | Markdown-formatted text |
+| `st.write(value)` | General-purpose output; renders text, numbers, or DataFrames |
+| `st.sidebar.header(text)` | Section heading inside the sidebar panel |
 | `st.sidebar.multiselect(label, options, default)` | Multi-select widget in sidebar |
 | `st.sidebar.slider(label, min, max, value)` | Numeric slider in sidebar |
 | `st.sidebar.text_input(label)` | Text input in sidebar |
@@ -442,7 +424,7 @@ is in the same directory as `app.py`.
 4. A user types `'; DROP TABLE municipio; --` into the search box. If
    your query uses `params=[f"%{search}%"]`, what happens? If it uses
    an f-string, what happens?
-5. Your app works perfectly in Colab but crashes on Streamlit Cloud with
+5. Your app works perfectly locally but crashes on Streamlit Cloud with
    `FileNotFoundError`. What is the most likely cause?
 
 If you can answer those clearly, you understand Streamlit well enough to

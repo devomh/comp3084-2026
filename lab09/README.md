@@ -2,9 +2,7 @@
 
 **Field Manual**: [concepts.md](https://github.com/devomh/comp3084-2026/blob/main/lab09/concepts.md)
 
-**Lab09**: [![Open Lab Notebook In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/devomh/comp3084-2026/blob/main/lab09/lab09.ipynb)
-
-**Live App**: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/devomh/comp3084-2026/main/lab09/app.py)
+**Live App**: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/devomh/comp3084-2026/main/lab09/app_demo.py)
 
 ## Case Brief
 
@@ -27,7 +25,7 @@ one lab session to build it and ship it.
 
 You are a **Dashboard Architect / Public Intelligence Officer** tasked with:
 
-1. Running a Streamlit app in Google Colab via a localtunnel bridge
+1. Running a Streamlit app locally and understanding the re-run model
 2. Connecting the app to `municipios.db` with parameterized SQL queries
 3. Wiring sidebar widgets to those queries so every filter change
    re-renders the data
@@ -40,11 +38,11 @@ You are a **Dashboard Architect / Public Intelligence Officer** tasked with:
 Any planner on the Council can open your URL and filter by their own
 region. If your query uses f-string interpolation instead of `params=`,
 a malicious user could rewrite your SQL. If your app uses an absolute
-Colab path (`/content/...`), it will crash the moment you deploy it to
-the cloud. If you forget to commit the database file, the deployed app
-will open to a `FileNotFoundError`. The technical details of this lab
-are not bureaucratic — they are the difference between a dashboard that
-ships and one that does not.
+path, it will crash the moment you deploy it to the cloud. If you forget
+to commit the database file, the deployed app will open to a
+`FileNotFoundError`. The technical details of this lab are not
+bureaucratic — they are the difference between a dashboard that ships and
+one that does not.
 
 ---
 
@@ -52,11 +50,9 @@ ships and one that does not.
 
 ### Technical Requirements
 
-- A Google account (for Colab and Streamlit Community Cloud)
+- Python 3.9+ with pip
 - A GitHub account with a **public** repository
 - Completion of Lab 08 (you must understand the `municipios.db` schema)
-
-No local Python installation is required. Everything runs in Colab.
 
 ### Evidence Files (Provided)
 
@@ -81,48 +77,25 @@ script to start the lab.
 
 ---
 
-## Colab Execution Model
+## Local Execution Model
 
-Streamlit is a web server — it cannot run inside a Jupyter cell. In
-Colab, a tunnel tool called **localtunnel** creates a temporary public
-URL that proxies your browser traffic to the Colab server's port 8501.
+Streamlit is a web server. Running `streamlit run app.py` starts it on
+`http://localhost:8501`. Every time you save `app.py`, Streamlit offers
+to rerun — click **Rerun** in the browser banner (or press `R`).
 
-**The four standard cells** (run once per session, in this order):
+**Setup (run once from the `lab09/` directory):**
 
-```python
-# 1 — Clone the course repo and move into the lab directory
-!git clone https://github.com/devomh/comp3084-2026.git
+```bash
+pip install -r requirements.txt
 ```
 
-```python
-# 2 — Change working directory (all later paths are relative to here)
-import os
-os.chdir("comp3084-2026/lab09")
+Then create `app.py` by following [`lab09.md`](lab09.md) and launch it:
+
+```bash
+streamlit run app.py
 ```
 
-```python
-# 3 — Install Streamlit
-!pip install -q streamlit
-```
-
-```python
-# 4 — Get the tunnel password (copy the IP address printed here)
-!wget -q -O - ipv4.icanhazip.com
-```
-
-```python
-# 5 — Launch the app and open the tunnel (keep this cell running)
-!streamlit run app.py & sleep 3 && npx localtunnel --port 8501
-```
-
-**To view the app:**
-1. Cell 5 prints `your url is: https://some-words.loca.lt`.
-2. Click the link → "Friendly Reminder" page appears.
-3. Paste the IP from cell 4 into the **Endpoint IP** box → Submit.
-
-**To iterate:** edit your `%%writefile app.py` cell, re-run it, stop
-cell 5, and re-run it. A new `loca.lt` URL will appear; the IP password
-stays the same within the session.
+Open `http://localhost:8501` in your browser.
 
 ---
 
@@ -131,19 +104,14 @@ stays the same within the session.
 Open [`lab09.md`](lab09.md) for the complete step-by-step guide.
 Consult [`concepts.md`](concepts.md) for technical background.
 
-### Phase 0: Colab Setup (part of Phase 1)
-
-Clone the repo, change directory, install Streamlit, and get the tunnel
-running. Every subsequent phase builds on this foundation.
-
 ### Phase 1: Hello, Dashboard (20 min)
 
 **Objective:** Understand the re-run model.
 
-You will write a three-line app, launch it via localtunnel, add a
-sidebar slider, and observe that moving the slider updates the displayed
-value without any button press. That automatic re-execution is the
-central concept of this lab.
+You will write a three-line app, launch it locally, add a sidebar slider,
+and observe that moving the slider updates the displayed value without any
+button press. That automatic re-execution is the central concept of this
+lab.
 
 ### Phase 2: The Data Layer (30 min)
 
@@ -188,13 +156,13 @@ widget interaction.
 
 ### Phase 5: Permanent Deployment (25 min)
 
-**Objective:** Produce a `*.streamlit.app` URL that does not disappear
-when the Colab session ends.
+**Objective:** Produce a `*.streamlit.app` URL that is accessible from
+anywhere, not just your local machine.
 
-You will download `app.py`, verify there are no absolute Colab paths,
-create `requirements.txt`, push to a public GitHub repo, and deploy
-on Streamlit Community Cloud. The final smoke test must pass in a
-private/incognito browser tab (no login, no IP password).
+You will verify `requirements.txt`, confirm the database is committed,
+push to a public GitHub repo, and deploy on Streamlit Community Cloud.
+The final smoke test must pass in a private/incognito browser tab (no
+login required).
 
 ---
 
@@ -205,8 +173,8 @@ After completing all phases, you should be able to answer:
 - What triggers a full top-to-bottom re-run of `app.py`?
 - Why does the connection need `@st.cache_resource` but the region list
   only needs `@st.cache_data`?
-- Why is the `loca.lt` URL temporary and the `streamlit.app` URL
-  permanent?
+- Why does `localhost:8501` disappear when you close your terminal, but
+  the `streamlit.app` URL stays up?
 - What four changes would you make to `app.py` to start your final
   project?
 
@@ -216,7 +184,7 @@ After completing all phases, you should be able to answer:
 - [ ] Both charts re-render when region filter changes
 - [ ] Search input returns results and handles the empty-result case
 - [ ] `st.stop()` guard present
-- [ ] No absolute paths (`/content/...`) in `app.py`
+- [ ] No absolute paths in `app.py` — use `"data/municipios.db"`
 - [ ] `data/municipios.db` committed to the repo
 - [ ] Reflection prompts answered in `submission.md`
 - [ ] AI Usage Appendix included if applicable
@@ -244,7 +212,7 @@ Complete [`submission.md`](submission.md) with:
 
 | Component | Points | Criteria |
 |---|---|---|
-| **Phase 1 — Streamlit basics** | 10 | App runs in Colab via localtunnel; re-run model explained correctly |
+| **Phase 1 — Streamlit basics** | 10 | App runs locally; re-run model explained correctly |
 | **Phase 2 — Data layer** | 15 | `@st.cache_resource` connection; `params=` queries; `st.stop()` guard present |
 | **Phase 3 — Layout and filters** | 20 | All three widgets wired to queries; KPI row renders correct values |
 | **Phase 4 — Plots** | 20 | Two matplotlib plots re-render on filter change; `plt.close(fig)` present; no `plt.show()` |
@@ -266,9 +234,8 @@ arrow must render correctly when regions are filtered.
    entire script. Once you understand this, caching and `st.stop()` are
    obvious; without it, they seem arbitrary.
 
-2. **Keep `%%writefile app.py` as your single source of truth.** Edit
-   that cell, re-run it, stop and restart cell 5. Do not maintain a
-   separate copy somewhere else — they will diverge.
+2. **Edit `app.py` directly in your editor.** Save the file and click
+   **Rerun** in the browser. Keep only one copy — do not duplicate it.
 
 3. **Test the empty-filter case before Phase 5.** Deselect all regions.
    The app should show a warning and stop — not a red stack trace. If
@@ -276,9 +243,9 @@ arrow must render correctly when regions are filtered.
    wrong place.
 
 4. **The absolute-path trap is real.** If your connection string is
-   `sqlite3.connect("/content/comp3084-2026/lab09/data/municipios.db")`,
-   your Streamlit Cloud deploy will fail with `FileNotFoundError`.
-   Use `"data/municipios.db"` — relative to wherever `app.py` lives.
+   `sqlite3.connect("/home/yourname/lab09/data/municipios.db")`, your
+   Streamlit Cloud deploy will fail with `FileNotFoundError`. Use
+   `"data/municipios.db"` — relative to wherever `app.py` lives.
 
 5. **Use `layout="wide"` in `st.set_page_config`.** Without it, charts
    will be narrow and the KPI row will wrap. This one setting makes the
@@ -294,4 +261,3 @@ arrow must render correctly when regions are filtered.
   [docs.streamlit.io/develop/concepts/architecture/caching](https://docs.streamlit.io/develop/concepts/architecture/caching)
 - Streamlit Community Cloud deployment guide:
   [docs.streamlit.io/deploy/streamlit-community-cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud)
-- localtunnel: [theboroer.github.io/localtunnel-www](https://theboroer.github.io/localtunnel-www/)

@@ -8,9 +8,6 @@
 
 ## Section A: Setup and First Run (Phase 1)
 
-### Localtunnel IP Address
-[Paste the IP address printed by `wget -q -O - ipv4.icanhazip.com`]
-
 ### Re-Run Model (Exercise 1.2)
 
 Describe in your own words what happened when you moved the slider:
@@ -73,7 +70,20 @@ in the SQL string?
 
 [your answer]
 
-### Exercise 3.4 — KPI Row
+### Exercise 3.3 — Region Aggregate Query
+
+Paste the `df_region` query:
+
+```python
+[your query here]
+```
+
+Why is this query placed in the `# --- Queries ---` block rather than
+at the bottom of the file where the chart that uses it is rendered?
+
+[your answer]
+
+### Exercise 3.5 — KPI Row
 
 With **all six regions** selected and `top_n = 10`:
 
@@ -126,7 +136,7 @@ Which Python objects are recreated on each widget change? Which are not?
 
 ### Live URL
 
-`*.streamlit.app` URL (must work without login or IP password):
+`*.streamlit.app` URL (must work without login):
 
 [paste URL here]
 
@@ -143,9 +153,9 @@ Which Python objects are recreated on each widget change? Which are not?
 
 ### Absolute-Path Check
 
-Did your original `app.py` contain any `/content/...` paths?
-[ ] Yes — I fixed them before deploying.
-[ ] No — the path was relative from the start.
+Does `app.py` use only relative paths (e.g. `data/municipios.db`)?
+[ ] Yes — all paths are relative.
+[ ] No — I found and fixed an absolute path before deploying.
 
 ---
 
